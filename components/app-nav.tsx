@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 
 const items = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/jd/new', label: 'New JD', icon: PlusSquare },
+  { href: '/documents/new', label: 'New Document', icon: PlusSquare },
   { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
