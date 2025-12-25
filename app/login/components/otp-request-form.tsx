@@ -31,8 +31,6 @@ const RequestForm = ({ onSubmit, loading }: Props) => {
       <Button type="submit" disabled={loading}>
         {loading ? 'Sending...' : 'Send code'}
       </Button>
-
-      {/* <p className="text-muted-foreground text-xs">You’ll receive an email with one-time password.</p> */}
     </form>
   );
 };

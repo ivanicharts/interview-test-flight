@@ -1,8 +1,9 @@
 'use client';
 import * as React from 'react';
 import { createClient } from '@/lib/supabase/client';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
-export const SupabaseContext = React.createContext<any>(null);
+export const SupabaseContext = React.createContext<SupabaseClient | null>(null);
 
 // Supabase browser client provider
 export function SupabaseProvider({ children }: { children: React.ReactNode }) {
