@@ -1,65 +1,192 @@
-import Image from "next/image";
+import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
 
-export default function Home() {
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+
+export const dynamic = 'force-dynamic';
+
+export default async function HomePage() {
+  // If logged in → go straight to app
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) redirect('/dashboard');
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen">
+      {/* Top bar */}
+      <header className="border-b">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+          <div className="flex items-center gap-3">
+            <div className="text-lg font-semibold tracking-tight">Interview Test Flight</div>
+            <Badge variant="secondary" className="hidden sm:inline-flex">
+              privacy-first
+            </Badge>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button asChild variant="ghost">
+              <Link href="/login" prefetch={false}>
+                Sign in
+              </Link>
+            </Button>
+            <Button asChild>
+              <Link href="/login" prefetch={false}>
+                Get started
+              </Link>
+            </Button>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </header>
+
+      {/* Hero */}
+      <main className="mx-auto max-w-6xl px-4 py-10 md:py-16">
+        <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+          <div className="space-y-6">
+            <div className="space-y-3">
+              <Badge variant="secondary">JD + CV → analysis → mock interview</Badge>
+
+              <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">
+                Practice interviews with real feedback — fast.
+              </h1>
+
+              <p className="text-muted-foreground max-w-xl text-base md:text-lg">
+                Paste a Job Description and your CV, get a structured match report with gaps and rewrite suggestions,
+                then run a question-by-question mock interview with scoring and improvements.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Button asChild size="lg">
+                <Link href="/login" prefetch={false}>
+                  Start with a JD
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="outline">
+                <Link href="/login?next=%2Fjd%2Fnew" prefetch={false}>
+                  Jump to create JD
+                </Link>
+              </Button>
+            </div>
+
+            <div className="text-muted-foreground text-xs">
+              Built for minimal retention, delete-anytime controls, and readable reports.
+            </div>
+          </div>
+
+          {/* Right panel */}
+          <Card className="space-y-4 p-5 md:p-6">
+            <div className="space-y-1">
+              <div className="text-sm font-semibold">What you’ll get</div>
+              <div className="text-muted-foreground text-sm">In ~2–5 minutes of setup time.</div>
+            </div>
+
+            <Separator />
+
+            <ul className="space-y-3 text-sm">
+              <li className="flex gap-3">
+                <span className="bg-primary mt-1 h-2 w-2 shrink-0 rounded-full" />
+                <div>
+                  <div className="font-medium">Structured match report</div>
+                  <div className="text-muted-foreground">Score, evidence mapping, gaps, and rewrite suggestions.</div>
+                </div>
+              </li>
+
+              <li className="flex gap-3">
+                <span className="bg-primary mt-1 h-2 w-2 shrink-0 rounded-full" />
+                <div>
+                  <div className="font-medium">Mock interview flow</div>
+                  <div className="text-muted-foreground">
+                    One question at a time, rubric scoring, actionable feedback.
+                  </div>
+                </div>
+              </li>
+
+              <li className="flex gap-3">
+                <span className="bg-primary mt-1 h-2 w-2 shrink-0 rounded-full" />
+                <div>
+                  <div className="font-medium">Session history</div>
+                  <div className="text-muted-foreground">Easy navigation across attempts and progress.</div>
+                </div>
+              </li>
+            </ul>
+
+            <Separator />
+
+            <div className="space-y-2">
+              <div className="text-sm font-semibold">Privacy-first</div>
+              <div className="text-muted-foreground text-sm">
+                You control retention. Delete data anytime in Settings (and RLS enforces ownership).
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Features */}
+        <div className="mt-12 space-y-6 md:mt-16">
+          <div className="space-y-2">
+            <h2 className="text-xl font-semibold md:text-2xl">How it works</h2>
+            <p className="text-muted-foreground text-sm">Simple flow, structured outputs, easy iteration.</p>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            <Card className="space-y-2 p-5">
+              <div className="text-sm font-semibold">1) Paste JD + CV</div>
+              <div className="text-muted-foreground text-sm">
+                Create a JD entry once. Reuse your CV and iterate quickly.
+              </div>
+            </Card>
+
+            <Card className="space-y-2 p-5">
+              <div className="text-sm font-semibold">2) Get match analysis</div>
+              <div className="text-muted-foreground text-sm">
+                See what matches, what’s missing, and what to improve.
+              </div>
+            </Card>
+
+            <Card className="space-y-2 p-5">
+              <div className="text-sm font-semibold">3) Practice interview</div>
+              <div className="text-muted-foreground text-sm">
+                Answer question-by-question (text/audio later), get feedback and improved answers.
+              </div>
+            </Card>
+          </div>
+
+          {/* CTA strip */}
+          <Card className="flex flex-col justify-between gap-4 p-5 md:flex-row md:items-center md:p-6">
+            <div>
+              <div className="text-base font-semibold">Ready to run a test flight?</div>
+              <div className="text-muted-foreground text-sm">Sign in and create your first JD.</div>
+            </div>
+            <div className="flex gap-2">
+              <Button asChild>
+                <Link href="/login" prefetch={false}>
+                  Sign in
+                </Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href="/login?next=%2Fdashboard" prefetch={false}>
+                  Go to dashboard
+                </Link>
+              </Button>
+            </div>
+          </Card>
         </div>
       </main>
+
+      {/* Footer */}
+      <footer className="border-t">
+        <div className="mx-auto flex max-w-6xl flex-col justify-between gap-2 px-4 py-6 sm:flex-row sm:items-center">
+          <div className="text-muted-foreground text-xs">© {new Date().getFullYear()} Interview Test Flight</div>
+          <div className="text-muted-foreground text-xs">Built with Next.js + Supabase + shadcn/ui</div>
+        </div>
+      </footer>
     </div>
   );
 }
