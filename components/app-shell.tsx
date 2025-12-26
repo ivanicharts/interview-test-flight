@@ -6,7 +6,7 @@ import { Separator } from '@/components/ui/separator';
 export function AppShell({ userEmail, children }: { userEmail: string | null; children: React.ReactNode }) {
   return (
     <div className="min-h-screen">
-      <div className="max-w-8xl mx-auto px-4 py-6">
+      <div className="mx-auto max-w-6xl px-4 py-6">
         <header className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/dashboard" className="text-lg font-semibold tracking-tight">

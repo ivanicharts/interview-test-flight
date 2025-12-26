@@ -45,6 +45,24 @@ export async function getDocumentsByIds(ids: string[]) {
   return supabase.from('documents').select('id, kind, content').in('id', ids);
 }
 
+export async function getDocuments() {
+  const supabase = await supabaseServer();
+  return supabase
+    .from('documents')
+    .select('id, kind, title, content, created_at, updated_at')
+    .order('updated_at', { ascending: false })
+    .limit(200);
+}
+
+export async function getDocumentById(id: string) {
+  const supabase = await supabaseServer();
+  return supabase
+    .from('documents')
+    .select('id, kind, title, content, created_at, updated_at')
+    .eq('id', id)
+    .single();
+}
+
 export const getUser = async () => {
   const supabase = await supabaseServer();
   const res = await supabase.auth.getUser();
