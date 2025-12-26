@@ -27,6 +27,24 @@ export async function getAnalysisById(id: string) {
     .single();
 }
 
+export async function getCachedAnalysis(jdId: string, cvId: string, model: string) {
+  const supabase = await supabaseServer();
+  return supabase
+    .from('analyses')
+    .select('id, report, created_at, model')
+    .eq('jd_document_id', jdId)
+    .eq('cv_document_id', cvId)
+    .eq('model', model)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+}
+
+export async function getDocumentsByIds(ids: string[]) {
+  const supabase = await supabaseServer();
+  return supabase.from('documents').select('id, kind, content').in('id', ids);
+}
+
 export const getUser = async () => {
   const supabase = await supabaseServer();
   const res = await supabase.auth.getUser();

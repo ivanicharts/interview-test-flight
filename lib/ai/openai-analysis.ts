@@ -36,45 +36,16 @@ export function hashedSafetyIdentifier(userId: string) {
 export async function analyzeJDAndCV(args: {
   jdText: string;
   cvText: string;
-  model?: string;
+  model: string;
   safetyIdentifier?: string;
 }): Promise<AnalysisResult> {
-  const model = args.model ?? process.env.OPENAI_ANALYSIS_MODEL ?? 'gpt-5-mini';
-
   const jd = clip(args.jdText, 14000);
   const cv = clip(args.cvText, 14000);
-
-  // const response = await openai.responses.parse({
-  //   model,
-  //   // OpenAI Responses can be stored by default; disable it for privacy-first behavior.
-  //   store: false, //
-  //   temperature: 0.2,
-  //   safety_identifier: args.safetyIdentifier,
-
-  //   input: [
-  //     { role: 'system', content: SYSTEM_PROMPT },
-  //     {
-  //       role: 'user',
-  //       content: JSON.stringify(
-  //         {
-  //           job_description: jd,
-  //           cv,
-  //           task: 'Analyze match, map evidence, list gaps, and suggest targeted rewrites.',
-  //         },
-  //         null,
-  //         2,
-  //       ),
-  //     },
-  //   ],
-
-  //   // Zod-based structured outputs (Responses API)
-  //   text: { format: zodTextFormat(AnalysisResultSchema, 'analysis_result') }, //
-  // });
 
   // Parsed object already validated by the SDK + schema, but keep a final parse as a guard.
 
   const response = await openai.responses.parse({
-    model: 'gpt-5-mini', // ✅ GPT-5 mini model id
+    model: args.model,
 
     // Privacy-first: don't store prompts/outputs on OpenAI side
     store: false,

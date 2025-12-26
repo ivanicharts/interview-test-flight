@@ -4,8 +4,6 @@ import { supabaseServer } from '@/lib/supabase/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import DocumentListClient from './components/document-list';
 
-export const dynamic = 'force-dynamic';
-
 export default async function DocumentsPage() {
   const supabase = await supabaseServer();
 

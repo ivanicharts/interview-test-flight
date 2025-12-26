@@ -38,7 +38,7 @@ export default async function AnalysisPage({ params }: { params: Promise<{ id: s
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-6">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
-          <h1 className="text-xl font-semibold text-zinc-100">Analysis report</h1>
+          <h1 className="text-xl font-semibold">Analysis report</h1>
 
           <div className="text-sm text-zinc-400">
             <span className="mr-3">Created: {formatDate(analysis.created_at)}</span>

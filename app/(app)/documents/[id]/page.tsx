@@ -8,8 +8,6 @@ function kindLabel(kind: string) {
   return kind === 'cv' ? 'CV' : 'Job Description';
 }
 
-export const dynamic = 'force-dynamic';
-
 export default async function DocumentViewPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await supabaseServer();
   const documentId = (await params).id;

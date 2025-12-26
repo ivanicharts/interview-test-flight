@@ -1,22 +1,20 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { supabaseServer } from '@/lib/supabase/server';
+
+import { getUser } from '@/lib/supabase/queries';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 
-export const dynamic = 'force-dynamic';
-
 export default async function HomePage() {
-  // If logged in → go straight to app
-  const supabase = await supabaseServer();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getUser();
 
-  if (user) redirect('/dashboard');
+  if (user) {
+    // If logged in → go straight to app
+    redirect('/dashboard');
+  }
 
   return (
     <div className="min-h-screen">
