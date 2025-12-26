@@ -1,23 +1,5 @@
 import type { AnalysisResult } from '@/lib/ai/schemas';
-
-function Pill({
-  children,
-  tone = 'neutral',
-}: {
-  children: React.ReactNode;
-  tone?: 'neutral' | 'good' | 'warn' | 'bad';
-}) {
-  const cls =
-    tone === 'good'
-      ? 'bg-emerald-500/15 text-emerald-200 ring-1 ring-emerald-500/30'
-      : tone === 'warn'
-        ? 'bg-amber-500/15 text-amber-200 ring-1 ring-amber-500/30'
-        : tone === 'bad'
-          ? 'bg-rose-500/15 text-rose-200 ring-1 ring-rose-500/30'
-          : 'bg-zinc-500/15 text-zinc-200 ring-1 ring-zinc-500/30';
-
-  return <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs ${cls}`}>{children}</span>;
-}
+import { Pill } from '@/components/ui/pill';
 
 function matchTone(match: AnalysisResult['evidence'][number]['match']) {
   if (match === 'strong') return 'good';

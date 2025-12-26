@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ModeToggle } from '@/components/theme-toggle';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { AppNav } from '@/components/app-nav';
 import { Separator } from '@/components/ui/separator';
 
@@ -17,7 +17,7 @@ export function AppShell({ userEmail, children }: { userEmail: string | null; ch
 
           <div className="flex items-center gap-3">
             {userEmail ? <span className="text-muted-foreground hidden text-sm sm:block">{userEmail}</span> : null}
-            <ModeToggle />
+            <ThemeToggle />
           </div>
         </header>
 

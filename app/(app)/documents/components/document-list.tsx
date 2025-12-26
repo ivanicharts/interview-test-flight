@@ -142,7 +142,7 @@ export default function DocumentListClient({ initialDocs }: { initialDocs: Doc[]
                 <div className="text-muted-foreground mt-1 truncate text-sm">{preview(d.content)}</div>
 
                 <div className="text-muted-foreground mt-1 text-xs">
-                  Updated: {new Date(d.updated_at).toLocaleString()}
+                  Updated: {new Date(d.updated_at).toLocaleString('en')}
                 </div>
               </div>
 
