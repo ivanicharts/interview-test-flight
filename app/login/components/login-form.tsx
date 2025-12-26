@@ -1,10 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
+import { Loader2 } from 'lucide-react';
 
 import { usePasswordAuth } from '@/lib/auth/auth';
+import { cn } from '@/lib/utils';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -33,51 +37,57 @@ export default function LoginForm({ onSuccess, onSignupClick }: Props) {
   }
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="flex w-full max-w-md flex-col gap-6">
       <CardHeader>
-        <CardTitle>Sign in</CardTitle>
-        <CardDescription>
-          Don't have an account?{' '}
-          <Button variant="inline-link" size="inline" onClick={onSignupClick}>
-            Sign up for free
-          </Button>
-        </CardDescription>
+        <CardTitle>Login to your account</CardTitle>
+        <CardDescription>Enter your email below to login to your account</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={onSubmit} className="grid gap-3">
-          {error ? (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          ) : null}
-
-          <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              autoComplete="email"
-              required
-            />
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
-              required
-            />
-          </div>
-
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? 'Signing in...' : 'Sign in'}
-          </Button>
+        <form onSubmit={onSubmit}>
+          <FieldGroup>
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            <Field>
+              <FieldLabel htmlFor="email">Email</FieldLabel>
+              <Input
+                id="email"
+                type="email"
+                placeholder="m@example.com"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </Field>
+            <Field>
+              <div className="flex items-center">
+                <FieldLabel htmlFor="password">Password</FieldLabel>
+                <Button asChild variant="link" size="inline" className="ml-auto inline-block">
+                  <Link href="/login/otp">Forgot your password?</Link>
+                </Button>
+              </div>
+              <Input
+                id="password"
+                type="password"
+                required
+                onChange={(e) => setPassword(e.target.value)}
+                value={password}
+              />
+            </Field>
+            <Field>
+              <Button type="submit" loading={isLoading}>
+                Login
+              </Button>
+              <FieldDescription className="text-center">
+                Don&apos;t have an account?{' '}
+                <Button variant="inline-link" size="inline" onClick={onSignupClick}>
+                  Sign up
+                </Button>
+              </FieldDescription>
+            </Field>
+          </FieldGroup>
         </form>
       </CardContent>
     </Card>

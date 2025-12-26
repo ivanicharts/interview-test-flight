@@ -28,8 +28,8 @@ const RequestForm = ({ onSubmit, loading }: Props) => {
         />
       </div>
 
-      <Button type="submit" disabled={loading}>
-        {loading ? 'Sending...' : 'Send code'}
+      <Button type="submit" loading={loading}>
+        Send code
       </Button>
     </form>
   );

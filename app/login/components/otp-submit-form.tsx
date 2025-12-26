@@ -56,8 +56,8 @@ const SubmitForm = ({ onSubmit, onGoBack, onRetry, email, loading }: Props) => {
         />
       </div>
 
-      <Button type="submit" disabled={loading}>
-        {loading ? 'Verifying...' : 'Verify & sign in'}
+      <Button type="submit" loading={loading}>
+        Verify & sign in
       </Button>
 
       <Separator />

@@ -3,10 +3,11 @@
 import * as React from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTriggerOtpAuth, useVerifyOtpAuth } from '@/lib/auth/auth';
+import Link from 'next/link';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { LinkButton } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 
 import RequestForm from '../components/otp-request-form';
 import SubmitForm from '../components/otp-submit-form';
@@ -130,9 +131,11 @@ export default function LoginPage() {
           ) : null}
         </CardContent>
       </Card>
-      <LinkButton href="/login" variant="link" className="text-muted-foreground text-xs">
-        Login via email & password
-      </LinkButton>
+      <Button asChild variant="link" className="text-muted-foreground text-xs">
+        <Link href="/login" prefetch={false}>
+          Login using password
+        </Link>
+      </Button>
     </div>
   );
 }
