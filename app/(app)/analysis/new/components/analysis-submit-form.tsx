@@ -20,7 +20,7 @@ export default function AnalysisSubmitForm({ jds, cvs }: { jds: Document[]; cvs:
 
   const canCreate = !!jdId && !!cvId && !isPending;
 
-  async function create() {
+  const create = async () => {
     if (!jdId || !cvId) return;
     setError(null);
 
@@ -33,7 +33,7 @@ export default function AnalysisSubmitForm({ jds, cvs }: { jds: Document[]; cvs:
         router.push(`/analysis/${result.data.id}`);
       }
     });
-  }
+  };
 
   return (
     <div className="space-y-5">
@@ -60,8 +60,8 @@ export default function AnalysisSubmitForm({ jds, cvs }: { jds: Document[]; cvs:
         <Button asChild variant="secondary">
           <Link href="/documents">Manage documents</Link>
         </Button>
-        <Button disabled={!canCreate} onClick={create}>
-          {isPending ? 'Generating…' : 'Generate report'}
+        <Button disabled={!canCreate} loading={isPending} onClick={create}>
+          Generate report
         </Button>
       </div>
 

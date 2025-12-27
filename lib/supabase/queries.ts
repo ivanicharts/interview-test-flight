@@ -45,13 +45,26 @@ export async function getDocumentsByIds(ids: string[]) {
   return supabase.from('documents').select('id, kind, content').in('id', ids);
 }
 
-export async function getDocuments() {
+export async function getDocuments(options?: { maxContentLength?: number }) {
   const supabase = await supabaseServer();
-  return supabase
+  const result = await supabase
     .from('documents')
     .select('id, kind, title, content, created_at, updated_at')
     .order('updated_at', { ascending: false })
     .limit(200);
+
+  // If maxContentLength is specified, truncate content
+  if (options?.maxContentLength && result.data) {
+    return {
+      ...result,
+      data: result.data.map((doc) => ({
+        ...doc,
+        content: doc.content ? doc.content.substring(0, options.maxContentLength) : doc.content,
+      })),
+    };
+  }
+
+  return result;
 }
 
 export async function getDocumentById(id: string) {
