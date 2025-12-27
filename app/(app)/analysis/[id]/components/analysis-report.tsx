@@ -23,19 +23,26 @@ interface AnalysisReportProps {
   result: AnalysisResult;
 }
 
+const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
+  <section className="bg-card rounded-xl border p-4 md:p-5">
+    <h2 className="mb-4 text-xl font-semibold">{title}</h2>
+    <div className="space-y-4">{children}</div>
+  </section>
+);
+
 export function AnalysisReport({ result }: AnalysisReportProps) {
   const score = result.overallScore;
 
   return (
     <div className="space-y-6">
       {/* Score */}
-      <section className="bg-card rounded-xl border p-5">
-        <div className="flex items-start justify-between gap-4">
-          <div>
+      <section className="bg-card rounded-xl border p-4 md:p-5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex-1">
             <h2 className="text-lg font-semibold">Match score</h2>
             <p className="text-muted-foreground mt-1 text-sm">{result.summary}</p>
           </div>
-          <div className="text-right">
+          <div className="shrink-0 text-left sm:text-right">
             <div className="text-3xl font-bold">{score}</div>
             <div className="text-muted-foreground text-xs">out of 100</div>
           </div>
@@ -60,14 +67,42 @@ export function AnalysisReport({ result }: AnalysisReportProps) {
       </section>
 
       {/* Evidence mapping */}
-      <section className="bg-card rounded-xl border p-5">
-        <div className="flex items-center justify-between">
+      <section className="bg-card rounded-xl border p-4 md:p-5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-lg font-semibold">Evidence mapping</h2>
           <Pill tone="neutral">{result.evidence.length} requirements</Pill>
         </div>
 
-        <div className="mt-4 overflow-x-auto">
-          <table className="w-full min-w-[900px] text-left text-sm">
+        {/* Mobile: Card layout */}
+        <div className="mt-4 space-y-3 md:hidden">
+          {result.evidence.map((e, i) => (
+            <div key={i} className="bg-muted/50 rounded-lg border p-3">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 font-medium">{e.requirement}</div>
+                <div className="flex shrink-0 gap-1">
+                  <Pill tone={IMPORTANCE_TONE_MAP[e.importance]}>{e.importance}</Pill>
+                  <Pill tone={MATCH_TONE_MAP[e.match]}>{e.match}</Pill>
+                </div>
+              </div>
+              <div className="mt-2 space-y-2 text-sm">
+                <div>
+                  <div className="text-muted-foreground text-xs">JD evidence:</div>
+                  <div className="text-muted-foreground">{e.jdEvidence}</div>
+                </div>
+                {e.cvEvidence && (
+                  <div>
+                    <div className="text-muted-foreground text-xs">CV evidence:</div>
+                    <div className="text-muted-foreground">{e.cvEvidence}</div>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop: Table layout */}
+        <div className="mt-4 hidden overflow-x-auto md:block">
+          <table className="w-full text-left text-sm">
             <thead className="text-muted-foreground">
               <tr className="border-b">
                 <th className="py-2 pr-4">Requirement</th>
@@ -97,16 +132,16 @@ export function AnalysisReport({ result }: AnalysisReportProps) {
       </section>
 
       {/* Gaps */}
-      <section className="bg-card rounded-xl border p-5">
-        <div className="flex items-center justify-between">
+      <section className="bg-card rounded-xl border p-4 md:p-5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-lg font-semibold">Gaps</h2>
           <Pill tone="neutral">{result.gaps.length} items</Pill>
         </div>
 
         <div className="mt-4 grid gap-3">
           {result.gaps.map((g, i) => (
-            <div key={i} className="bg-muted/50 rounded-lg border p-4">
-              <div className="flex items-center justify-between gap-3">
+            <div key={i} className="bg-muted/50 rounded-lg border p-3 md:p-4">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="font-medium">{g.title}</div>
                 <Pill tone={PRIORITY_TONE_MAP[g.priority]}>{g.priority}</Pill>
               </div>
@@ -122,18 +157,18 @@ export function AnalysisReport({ result }: AnalysisReportProps) {
       </section>
 
       {/* Rewrite suggestions */}
-      <section className="bg-card rounded-xl border p-5">
+      <section className="bg-card rounded-xl border p-4 md:p-5">
         <h2 className="text-lg font-semibold">Rewrite suggestions</h2>
 
         {result.rewriteSuggestions.headline && (
-          <div className="bg-muted/50 mt-3 rounded-lg border p-4">
+          <div className="bg-muted/50 mt-3 rounded-lg border p-3 md:p-4">
             <div className="text-muted-foreground text-sm">Suggested headline</div>
             <div className="mt-1 font-medium">{result.rewriteSuggestions.headline}</div>
           </div>
         )}
 
         <div className="mt-4 grid gap-4 lg:grid-cols-2">
-          <div className="bg-muted/50 rounded-lg border p-4">
+          <div className="bg-muted/50 rounded-lg border p-3 md:p-4">
             <div className="text-sm font-medium">Summary bullets</div>
             <ul className="mt-3 list-disc space-y-1 pl-5 text-sm">
               {result.rewriteSuggestions.summaryBullets.map((b, i) => (
@@ -142,7 +177,7 @@ export function AnalysisReport({ result }: AnalysisReportProps) {
             </ul>
           </div>
 
-          <div className="bg-muted/50 rounded-lg border p-4">
+          <div className="bg-muted/50 rounded-lg border p-3 md:p-4">
             <div className="text-sm font-medium">Keyword additions</div>
             <div className="mt-3 flex flex-wrap gap-2">
               {result.rewriteSuggestions.keywordAdditions.map((k, i) => (
@@ -154,12 +189,12 @@ export function AnalysisReport({ result }: AnalysisReportProps) {
           </div>
         </div>
 
-        <div className="bg-muted/50 mt-4 rounded-lg border p-4">
+        <div className="bg-muted/50 mt-4 rounded-lg border p-3 md:p-4">
           <div className="text-sm font-medium">Experience bullet upgrades</div>
           <div className="mt-3 space-y-3">
             {result.rewriteSuggestions.experienceBullets.map((b, i) => (
               <div key={i} className="bg-card rounded-md border p-3">
-                <div className="flex items-center justify-between gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div className="text-sm font-medium">{b.section}</div>
                   <Pill tone="neutral">rewrite</Pill>
                 </div>
