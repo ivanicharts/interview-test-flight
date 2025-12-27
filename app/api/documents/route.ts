@@ -11,8 +11,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invalid kind' }, { status: 400 });
   }
 
+  if (!title || title.trim().length === 0) {
+    return NextResponse.json({ error: 'Title is required' }, { status: 400 });
+  }
+
   if (!content || content.trim().length < 50) {
-    return NextResponse.json({ error: 'Content too short (min ~50 chars)' }, { status: 400 });
+    return NextResponse.json({ error: 'Content too short (min 50 chars)' }, { status: 400 });
   }
 
   const { user, error: userErr } = await getUser();
@@ -22,7 +26,7 @@ export async function POST(req: Request) {
   }
 
   const { data, error } = await createDocument({
-    kind,
+    documentType: kind,
     title,
     content,
   });

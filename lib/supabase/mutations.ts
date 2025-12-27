@@ -1,5 +1,6 @@
 import { supabaseServer } from '@/lib/supabase/server';
 import type { AnalysisResult } from '@/lib/ai/schemas';
+import { DocumentType } from '@/lib/types';
 
 export async function createAnalysis({
   userId,
@@ -30,20 +31,20 @@ export async function createAnalysis({
 }
 
 export async function createDocument({
-  kind,
+  documentType,
   title,
   content,
 }: {
-  kind: 'jd' | 'cv';
-  title?: string | null;
+  documentType: DocumentType;
+  title: string;
   content: string;
 }) {
   const supabase = await supabaseServer();
   return supabase
     .from('documents')
     .insert({
-      kind,
-      title: title?.trim() || null,
+      kind: documentType,
+      title: title.trim(),
       content: content.trim(),
       // user_id defaults to auth.uid()
     })

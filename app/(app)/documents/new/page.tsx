@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTransition } from 'react';
 
 import { Section } from '@/components/ui/section';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -10,100 +11,101 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { DocumentType } from '@/lib/types';
 
-type Kind = 'jd' | 'cv';
+import { createDocumentAction } from '../actions';
 
-function clampKind(v: string | null): Kind {
+function clampKind(v: string | null): DocumentType {
   return v === 'cv' ? 'cv' : 'jd';
 }
 
 export default function NewDocumentPage() {
   const router = useRouter();
   const sp = useSearchParams();
+  const [isPending, startTransition] = useTransition();
 
-  const [kind, setKind] = React.useState<Kind>(() => clampKind(sp.get('kind')));
+  const [documentType, setDocumentType] = React.useState<DocumentType>(() => clampKind(sp.get('kind')));
   const [title, setTitle] = React.useState('');
   const [content, setContent] = React.useState('');
   const [error, setError] = React.useState<string | null>(null);
-  const [isSaving, setIsSaving] = React.useState(false);
 
   const charCount = content.length;
-  const canSave = content.trim().length >= 50 && !isSaving;
 
-  async function onSave() {
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
     setError(null);
-    setIsSaving(true);
-    try {
-      const res = await fetch('/api/documents', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ kind, title, content }),
-      });
 
-      const json = (await res.json()) as { id?: string; error?: string };
-      if (!res.ok) throw new Error(json.error || 'Failed to save');
+    startTransition(async () => {
+      const result = await createDocumentAction({ documentType, title, content });
 
-      router.push(`/documents/${json.id}`);
-    } catch (e: any) {
-      setError(e?.message ?? 'Something went wrong');
-    } finally {
-      setIsSaving(false);
-    }
+      if (result.error) {
+        setError(result.error);
+      } else if (result.data) {
+        router.push(`/documents/${result.data.id}`);
+      }
+    });
   }
 
   return (
     <Section title="New document" description="Paste the text for your Job Description or CV.">
-      <div className="space-y-6">
-        <Tabs value={kind} onValueChange={(v) => setKind(v as Kind)}>
+      <form onSubmit={onSubmit} className="space-y-6">
+        <Tabs value={documentType} onValueChange={(v) => setDocumentType(v as DocumentType)}>
           <TabsList>
-            <TabsTrigger value="jd">Job Description</TabsTrigger>
-            <TabsTrigger value="cv">CV</TabsTrigger>
+            <TabsTrigger value="jd" type="button">
+              Job Description
+            </TabsTrigger>
+            <TabsTrigger value="cv" type="button">
+              CV
+            </TabsTrigger>
           </TabsList>
         </Tabs>
 
         <div className="space-y-2">
-          <Label htmlFor="title">Title (optional)</Label>
+          <Label htmlFor="title">Title</Label>
           <Input
             id="title"
-            placeholder={kind === 'jd' ? 'e.g. Senior Frontend Engineer (Company X)' : 'e.g. John Doe CV v1'}
+            placeholder={documentType === 'jd' ? 'e.g. Senior Frontend Engineer (Company X)' : 'e.g. John Doe CV v1'}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             autoComplete="off"
+            required
           />
         </div>
 
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-4">
-            <Label htmlFor="content">{kind === 'jd' ? 'JD text' : 'CV text'}</Label>
+            <Label htmlFor="content">{documentType === 'jd' ? 'JD text' : 'CV text'}</Label>
             <span className="text-muted-foreground text-xs">{charCount} chars</span>
           </div>
           <Textarea
             id="content"
-            placeholder={kind === 'jd' ? 'Paste the job description here...' : 'Paste your CV here...'}
+            placeholder={documentType === 'jd' ? 'Paste the job description here...' : 'Paste your CV here...'}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             className="max-h-100 min-h-80 resize-y"
+            required
+            minLength={50}
           />
           <div className="text-muted-foreground text-xs">
-            Tip: include the full text (requirements + responsibilities). Minimum ~50 chars.
+            Tip: include the full text (requirements + responsibilities). Minimum 50 chars.
           </div>
         </div>
 
         {error ? (
-          <Alert>
+          <Alert variant="destructive">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         ) : null}
 
         <div className="flex items-center justify-end gap-2">
-          <Button variant="secondary" onClick={() => router.back()} disabled={isSaving}>
+          <Button type="button" variant="secondary" onClick={() => router.back()} disabled={isPending}>
             Cancel
           </Button>
-          <Button onClick={onSave} disabled={!canSave}>
-            {isSaving ? 'Saving…' : 'Save'}
+          <Button type="submit" disabled={isPending} loading={isPending}>
+            Save
           </Button>
         </div>
-      </div>
+      </form>
     </Section>
   );
 }
