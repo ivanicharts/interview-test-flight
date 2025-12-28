@@ -61,7 +61,7 @@ export default function NewDocumentPage() {
         </Tabs>
 
         <div className="space-y-2">
-          <Label htmlFor="title">Title</Label>
+          <Label htmlFor="title">{documentType === 'jd' ? 'Job Position' : 'CV Title'}</Label>
           <Input
             id="title"
             placeholder={

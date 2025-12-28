@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { formatDate } from '@/lib/utils';
-import { getUser } from '@/lib/supabase/queries';
+import { getUser, getInterviewSessions } from '@/lib/supabase/queries';
 import { PageSection } from '@/components/ui/page-section';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -14,12 +14,10 @@ export default async function InterviewsPage() {
     redirect('/login');
   }
 
-  // TODO: Create getInterviewSessions() query in lib/supabase/queries.ts
-  // const { data: sessions, error } = await getInterviewSessions();
-  // if (error) {
-  //   throw new Error(error.message);
-  // }
-  const sessions: any[] = [];
+  const { data: sessions, error } = await getInterviewSessions();
+  if (error) {
+    throw new Error(error.message);
+  }
 
   return (
     <PageSection

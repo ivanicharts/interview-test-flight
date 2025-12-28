@@ -42,7 +42,7 @@ export async function getCachedAnalysis(jdId: string, cvId: string, model: strin
 
 export async function getDocumentsByIds(ids: string[]) {
   const supabase = await supabaseServer();
-  return supabase.from('documents').select('id, kind, content').in('id', ids);
+  return supabase.from('documents').select('id, title, kind, content').in('id', ids);
 }
 
 export async function getDocuments(options?: { maxContentLength?: number }) {
@@ -84,3 +84,49 @@ export const getUser = async () => {
     ...res,
   };
 };
+
+// ==================== Interview Queries ====================
+
+export async function getInterviewSessions() {
+  const supabase = await supabaseServer();
+  return supabase
+    .from('interview_sessions')
+    .select(
+      `
+      id,
+      status,
+      mode,
+      created_at,
+      started_at,
+      completed_at,
+      analysis:analysis_id(
+        id,
+        jd_document:jd_document_id(title),
+        cv_document:cv_document_id(title)
+      )
+    `,
+    )
+    .order('created_at', { ascending: false })
+    .limit(100);
+}
+
+export async function getInterviewSessionById(id: string) {
+  const supabase = await supabaseServer();
+  return supabase
+    .from('interview_sessions')
+    .select('id, status, mode, plan, created_at, started_at, completed_at, analysis_id')
+    .eq('id', id)
+    .single();
+}
+
+export async function getActiveInterviewForAnalysis(analysisId: string) {
+  const supabase = await supabaseServer();
+  return supabase
+    .from('interview_sessions')
+    .select('id, status, plan, created_at')
+    .eq('analysis_id', analysisId)
+    .in('status', ['pending', 'in_progress'])
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+}

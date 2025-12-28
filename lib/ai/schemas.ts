@@ -110,3 +110,53 @@ export const AnalysisResultSchema = z.object({
 });
 
 export type AnalysisResult = z.infer<typeof AnalysisResultSchema>;
+
+// ==================== Interview Schemas ====================
+
+export const RubricItemSchema = z.object({
+  signal: z.string().min(1).max(200),
+  tone: z.enum(['good', 'bad', 'neutral']),
+});
+
+export const QuestionRubricSchema = z.object({
+  scoringGuide: z.string().min(1).max(600),
+  goodSignals: z.array(z.string().min(1).max(200)).min(2).max(8),
+  badSignals: z.array(z.string().min(1).max(200)).min(2).max(8),
+  expectedDuration: z.string().max(60).optional().nullable(),
+});
+
+export const InterviewQuestionSchema = z.object({
+  category: z.enum(['technical', 'behavioral', 'situational', 'strength-based', 'gap-based']),
+  questionText: z.string().min(10).max(800),
+  context: z.string().max(400).optional().nullable(),
+  rubric: QuestionRubricSchema,
+  targetGap: z.string().max(120).optional().nullable(),
+  targetStrength: z.string().max(200).optional().nullable(),
+});
+
+export const InterviewPlanSchema = z.object({
+  version: z.literal('1.0'),
+  roleTitle: z.string().min(1).max(200),
+  difficulty: z.enum(['entry', 'mid', 'senior', 'lead']),
+  questions: z.array(InterviewQuestionSchema).min(8).max(12),
+  overview: z.object({
+    focusRationale: z.string().min(1).max(800),
+    balanceRationale: z.string().min(1).max(600),
+  }),
+  meta: z.object({
+    model: z.string(),
+    generatedAt: z.string(),
+    basedOnAnalysisScore: z.number().int().min(0).max(100),
+  }),
+});
+
+export type RubricItem = z.infer<typeof RubricItemSchema>;
+export type QuestionRubric = z.infer<typeof QuestionRubricSchema>;
+export type InterviewQuestion = z.infer<typeof InterviewQuestionSchema>;
+export type InterviewPlan = z.infer<typeof InterviewPlanSchema>;
+
+export const CreateInterviewRequestSchema = z.object({
+  analysisId: z.string().uuid(),
+  mode: z.enum(['text', 'audio']).optional().default('text'),
+  focusAreas: z.array(z.string()).optional(),
+});

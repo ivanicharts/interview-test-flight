@@ -1,5 +1,5 @@
 import { supabaseServer } from '@/lib/supabase/server';
-import type { AnalysisResult } from '@/lib/ai/schemas';
+import type { AnalysisResult, InterviewPlan } from '@/lib/ai/schemas';
 import { DocumentType } from '@/lib/types';
 
 export async function createAnalysis({
@@ -55,4 +55,81 @@ export async function createDocument({
 export async function deleteDocument({ id }: { id: string }) {
   const supabase = await supabaseServer();
   return supabase.from('documents').delete().eq('id', id);
+}
+
+// ==================== Interview Mutations ====================
+
+export async function createInterviewSession({
+  userId,
+  analysisId,
+  mode,
+  plan,
+}: {
+  userId: string;
+  analysisId: string;
+  mode: string;
+  plan: InterviewPlan;
+}) {
+  const supabase = await supabaseServer();
+
+  // Insert session first
+  const sessionResult = await supabase
+    .from('interview_sessions')
+    .insert({
+      user_id: userId,
+      analysis_id: analysisId,
+      status: 'pending',
+      mode,
+      plan, // Store full plan as JSONB
+    })
+    .select('id')
+    .single();
+
+  if (sessionResult.error) {
+    return sessionResult;
+  }
+
+  const sessionId = sessionResult.data.id;
+
+  // Denormalize questions into interview_questions table
+  const questions = plan.questions.map((q, index) => ({
+    session_id: sessionId,
+    order_index: index,
+    category: q.category,
+    question_text: q.questionText,
+    context: q.context,
+    rubric: q.rubric,
+    target_gap: q.targetGap,
+    target_strength: q.targetStrength,
+  }));
+
+  const questionsResult = await supabase.from('interview_questions').insert(questions);
+
+  if (questionsResult.error) {
+    // Rollback session if questions insert fails
+    await supabase.from('interview_sessions').delete().eq('id', sessionId);
+    return questionsResult;
+  }
+
+  return sessionResult;
+}
+
+export async function updateInterviewSessionStatus({
+  sessionId,
+  status,
+}: {
+  sessionId: string;
+  status: 'pending' | 'in_progress' | 'completed';
+}) {
+  const supabase = await supabaseServer();
+
+  const updates: Record<string, unknown> = { status };
+
+  if (status === 'in_progress') {
+    updates.started_at = new Date().toISOString();
+  } else if (status === 'completed') {
+    updates.completed_at = new Date().toISOString();
+  }
+
+  return supabase.from('interview_sessions').update(updates).eq('id', sessionId).select('id').single();
 }

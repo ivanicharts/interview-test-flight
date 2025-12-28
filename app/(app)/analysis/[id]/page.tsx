@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 import { AnalysisReport } from './components/analysis-report';
+import { StartInterviewButton } from './components/start-interview-button';
 
 const ParamsSchema = z.object({ id: z.uuid() });
 
@@ -47,6 +48,7 @@ export default async function AnalysisPage({ params }: { params: Promise<{ id: s
       }
       actions={
         <div className="flex flex-wrap gap-2">
+          <StartInterviewButton analysisId={id} />
           <Button asChild variant="secondary" size="sm">
             <Link href={`/documents/${analysis.jd_document_id}`}>Open JD</Link>
           </Button>

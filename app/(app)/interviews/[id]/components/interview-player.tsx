@@ -1,0 +1,221 @@
+'use client';
+
+import { useState } from 'react';
+import { ChevronLeft, ChevronRight, Eye, EyeOff } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { cn } from '@/lib/utils';
+import type { InterviewPlan } from '@/lib/ai/schemas';
+
+export function InterviewPlayer({ plan }: { plan: InterviewPlan }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [showRubric, setShowRubric] = useState(false);
+
+  const currentQuestion = plan.questions[currentIndex];
+  const totalQuestions = plan.questions.length;
+  const progress = ((currentIndex + 1) / totalQuestions) * 100;
+
+  const categoryColors: Record<string, string> = {
+    technical: 'bg-blue-500/10 text-blue-700 dark:text-blue-400',
+    behavioral: 'bg-purple-500/10 text-purple-700 dark:text-purple-400',
+    situational: 'bg-amber-500/10 text-amber-700 dark:text-amber-400',
+    'strength-based': 'bg-green-500/10 text-green-700 dark:text-green-400',
+    'gap-based': 'bg-red-500/10 text-red-700 dark:text-red-400',
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Progress bar */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-muted-foreground">
+            Question {currentIndex + 1} of {totalQuestions}
+          </span>
+          <span className="text-muted-foreground">{Math.round(progress)}% complete</span>
+        </div>
+        <Progress value={progress} />
+      </div>
+
+      {/* Two-column layout */}
+      <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+        {/* Main question card */}
+        <div className="space-y-4">
+          <div className="border-border/60 bg-card space-y-4 rounded-lg border p-6">
+            <div className="flex items-center gap-2">
+              <Badge className={categoryColors[currentQuestion.category] || ''} variant="secondary">
+                {currentQuestion.category}
+              </Badge>
+              <span className="text-muted-foreground text-xs">Question {currentIndex + 1}</span>
+            </div>
+
+            <div className="text-lg font-medium leading-relaxed">{currentQuestion.questionText}</div>
+
+            {currentQuestion.context && (
+              <div className="bg-muted/30 border-border/60 rounded-md border p-3 text-sm">
+                <div className="text-muted-foreground mb-1 text-xs font-medium">Context</div>
+                {currentQuestion.context}
+              </div>
+            )}
+
+            {(currentQuestion.targetGap || currentQuestion.targetStrength) && (
+              <div className="flex flex-wrap gap-2 text-xs">
+                {currentQuestion.targetGap && (
+                  <Badge variant="outline" className="text-red-700 dark:text-red-400">
+                    Targets gap: {currentQuestion.targetGap}
+                  </Badge>
+                )}
+                {currentQuestion.targetStrength && (
+                  <Badge variant="outline" className="text-green-700 dark:text-green-400">
+                    Leverages: {currentQuestion.targetStrength}
+                  </Badge>
+                )}
+              </div>
+            )}
+
+            {/* Rubric toggle */}
+            <div className="border-t pt-4">
+              <Button variant="outline" size="sm" onClick={() => setShowRubric(!showRubric)}>
+                {showRubric ? (
+                  <>
+                    <EyeOff className="mr-2 h-4 w-4" />
+                    Hide Rubric
+                  </>
+                ) : (
+                  <>
+                    <Eye className="mr-2 h-4 w-4" />
+                    Show Rubric
+                  </>
+                )}
+              </Button>
+
+              {showRubric && (
+                <div className="bg-muted/20 mt-4 space-y-4 rounded-md p-4">
+                  <div>
+                    <div className="mb-2 text-xs font-medium">Scoring Guide</div>
+                    <p className="text-muted-foreground text-sm">
+                      {currentQuestion.rubric.scoringGuide}
+                    </p>
+                  </div>
+
+                  <div>
+                    <div className="mb-2 text-xs font-medium text-green-700 dark:text-green-400">
+                      Good Signals
+                    </div>
+                    <ul className="text-muted-foreground space-y-1 text-sm">
+                      {currentQuestion.rubric.goodSignals.map((signal, i) => (
+                        <li key={i} className="flex gap-2">
+                          <span className="text-green-600 dark:text-green-500">✓</span>
+                          <span>{signal}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div>
+                    <div className="mb-2 text-xs font-medium text-red-700 dark:text-red-400">
+                      Bad Signals
+                    </div>
+                    <ul className="text-muted-foreground space-y-1 text-sm">
+                      {currentQuestion.rubric.badSignals.map((signal, i) => (
+                        <li key={i} className="flex gap-2">
+                          <span className="text-red-600 dark:text-red-500">✗</span>
+                          <span>{signal}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {currentQuestion.rubric.expectedDuration && (
+                    <div className="text-muted-foreground text-xs">
+                      Expected duration: {currentQuestion.rubric.expectedDuration}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Answer input placeholder */}
+          <div className="border-border/60 bg-muted/10 rounded-lg border p-6 text-center">
+            <div className="text-muted-foreground text-sm">
+              Answer input will be added in Step 9
+            </div>
+            <p className="text-muted-foreground mt-2 text-xs">
+              You'll be able to record text or audio answers here.
+            </p>
+          </div>
+
+          {/* Navigation buttons */}
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setCurrentIndex(currentIndex - 1)}
+              disabled={currentIndex === 0}
+            >
+              <ChevronLeft className="mr-2 h-4 w-4" />
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setCurrentIndex(currentIndex + 1)}
+              disabled={currentIndex === totalQuestions - 1}
+            >
+              Next
+              <ChevronRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Timeline sidebar */}
+        <div className="space-y-4">
+          <div className="border-border/60 bg-card sticky top-4 rounded-lg border p-4">
+            <div className="mb-3 text-sm font-medium">Timeline</div>
+            <div className="space-y-2">
+              {plan.questions.map((question, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentIndex(index)}
+                  className={cn(
+                    'flex w-full flex-col gap-1 rounded-md border p-3 text-left transition',
+                    'hover:bg-muted/30',
+                    currentIndex === index
+                      ? 'border-primary bg-primary/10'
+                      : 'border-border/60 bg-background',
+                  )}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground text-xs">Q{index + 1}</span>
+                    <Badge
+                      className={cn('text-[10px]', categoryColors[question.category] || '')}
+                      variant="secondary"
+                    >
+                      {question.category}
+                    </Badge>
+                  </div>
+                  <div className="line-clamp-2 text-xs">{question.questionText}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Overview section */}
+      <div className="border-border/60 bg-card rounded-lg border p-6">
+        <div className="mb-3 text-sm font-medium">Interview Overview</div>
+        <div className="space-y-3 text-sm">
+          <div>
+            <div className="text-muted-foreground mb-1 text-xs font-medium">Focus</div>
+            <p className="text-muted-foreground">{plan.overview.focusRationale}</p>
+          </div>
+          <div>
+            <div className="text-muted-foreground mb-1 text-xs font-medium">Balance</div>
+            <p className="text-muted-foreground">{plan.overview.balanceRationale}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
