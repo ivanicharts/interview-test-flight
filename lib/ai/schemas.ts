@@ -171,3 +171,47 @@ export const SubmitAnswerSchema = z.object({
 });
 
 export type SubmitAnswerInput = z.infer<typeof SubmitAnswerSchema>;
+
+// ==================== Answer Evaluation Schemas ====================
+
+export const DetectedSignalSchema = z.object({
+  signal: z.string().min(1).max(200),
+  tone: z.enum(['good', 'bad']),
+  evidence: z.string().max(400).optional().nullable(), // Quote from answer
+});
+
+export const AnswerEvaluationSchema = z.object({
+  version: z.literal('1.0'),
+
+  // Overall assessment
+  score: z.number().int().min(0).max(100),
+  tier: z.enum(['strong', 'adequate', 'weak', 'insufficient']),
+
+  // Detailed feedback
+  summary: z.string().min(10).max(600),
+
+  // Signal detection
+  detectedGoodSignals: z.array(DetectedSignalSchema).max(8),
+  detectedBadSignals: z.array(DetectedSignalSchema).max(8),
+  missedSignals: z.array(z.string().min(1).max(200)).max(8),
+
+  // Actionable suggestions
+  improvements: z.array(
+    z.object({
+      area: z.string().min(1).max(120),
+      suggestion: z.string().min(1).max(400),
+      priority: z.enum(['high', 'medium', 'low']),
+    }),
+  ).max(5),
+
+  // Metadata
+  meta: z.object({
+    model: z.string(),
+    evaluatedAt: z.string(), // ISO timestamp
+    answerLength: z.number().int().nonnegative(),
+    rubricBasedEvaluation: z.boolean().default(true),
+  }),
+});
+
+export type DetectedSignal = z.infer<typeof DetectedSignalSchema>;
+export type AnswerEvaluation = z.infer<typeof AnswerEvaluationSchema>;

@@ -5,11 +5,14 @@ import { Check } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import type { AnswerEvaluation } from '@/lib/ai/schemas';
+import { AnswerEvaluation as AnswerEvaluationComponent } from './answer-evaluation';
 
 interface AnswerInputProps {
   sessionId: string;
   questionId: string;
   initialAnswer?: string | null;
+  evaluation?: AnswerEvaluation | null;
   onSubmitSuccess?: () => void;
   submitAction: (data: {
     sessionId: string;
@@ -22,6 +25,7 @@ export function AnswerInput({
   sessionId,
   questionId,
   initialAnswer,
+  evaluation,
   onSubmitSuccess,
   submitAction,
 }: AnswerInputProps) {
@@ -100,6 +104,8 @@ export function AnswerInput({
           {error}
         </div>
       )}
+
+      {evaluation && <AnswerEvaluationComponent evaluation={evaluation} className="mt-4" />}
     </div>
   );
 }

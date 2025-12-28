@@ -6,8 +6,9 @@ import { ChevronLeft, ChevronRight, Eye, EyeOff, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Pill, type PillProps } from '@/components/ui/pill';
 import { cn } from '@/lib/utils';
-import type { InterviewPlan } from '@/lib/ai/schemas';
+import type { InterviewPlan, AnswerEvaluation } from '@/lib/ai/schemas';
 
 import { AnswerInput } from './answer-input';
 import { submitAnswerAction } from '../../actions';
@@ -24,6 +25,9 @@ interface QuestionWithAnswer {
   answer: {
     answer_text: string | null;
     answer_mode: string;
+    evaluation_score: number | null;
+    evaluation_result: AnswerEvaluation | null;
+    evaluated_at: string | null;
   } | null;
 }
 
@@ -52,6 +56,12 @@ export function InterviewPlayer({ plan, sessionId, questionsWithAnswers }: Inter
     situational: 'bg-amber-500/10 text-amber-700 dark:text-amber-400',
     'strength-based': 'bg-green-500/10 text-green-700 dark:text-green-400',
     'gap-based': 'bg-red-500/10 text-red-700 dark:text-red-400',
+  };
+
+  const getScoreTone = (score: number): PillProps['tone'] => {
+    if (score >= 75) return 'good';
+    if (score >= 50) return 'warn';
+    return 'bad';
   };
 
   const handleAnswerSubmitSuccess = () => {
@@ -181,6 +191,7 @@ export function InterviewPlayer({ plan, sessionId, questionsWithAnswers }: Inter
               sessionId={sessionId}
               questionId={currentQuestionData.id}
               initialAnswer={currentQuestionData.answer?.answer_text}
+              evaluation={currentQuestionData.answer?.evaluation_result}
               submitAction={submitAnswerAction}
               onSubmitSuccess={handleAnswerSubmitSuccess}
             />
@@ -237,6 +248,11 @@ export function InterviewPlayer({ plan, sessionId, questionsWithAnswers }: Inter
                         {question.category}
                       </Badge>
                       {isAnswered && <Check className="ml-auto h-3 w-3 text-green-600 dark:text-green-400" />}
+                      {questionData.answer?.evaluation_score !== null && questionData.answer?.evaluation_score !== undefined && (
+                        <Pill tone={getScoreTone(questionData.answer.evaluation_score)} className="ml-auto text-[10px]">
+                          {questionData.answer.evaluation_score}
+                        </Pill>
+                      )}
                     </div>
                     <div className="line-clamp-2 text-xs">{question.questionText}</div>
                   </button>

@@ -1,5 +1,5 @@
 import { supabaseServer } from '@/lib/supabase/server';
-import type { AnalysisResult, InterviewPlan } from '@/lib/ai/schemas';
+import type { AnalysisResult, InterviewPlan, AnswerEvaluation } from '@/lib/ai/schemas';
 import { DocumentType } from '@/lib/types';
 
 export async function createAnalysis({
@@ -160,5 +160,26 @@ export async function upsertInterviewAnswer({
       { onConflict: 'session_id,question_id' },
     )
     .select('id')
+    .single();
+}
+
+export async function saveAnswerEvaluation({
+  answerId,
+  evaluation,
+}: {
+  answerId: string;
+  evaluation: AnswerEvaluation;
+}) {
+  const supabase = await supabaseServer();
+
+  return supabase
+    .from('interview_answers')
+    .update({
+      evaluation_score: evaluation.score,
+      evaluation_result: evaluation,
+      evaluated_at: new Date().toISOString(),
+    })
+    .eq('id', answerId)
+    .select('id, evaluation_score')
     .single();
 }

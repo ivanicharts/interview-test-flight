@@ -155,7 +155,7 @@ export async function getInterviewQuestionsWithAnswers(sessionId: string) {
 
   const { data: answers, error: answersError } = await supabase
     .from('interview_answers')
-    .select('question_id, answer_text, answer_audio_url, answer_mode, created_at, updated_at')
+    .select('question_id, answer_text, answer_audio_url, answer_mode, created_at, updated_at, evaluation_score, evaluation_result, evaluated_at')
     .eq('session_id', sessionId);
 
   if (answersError) {

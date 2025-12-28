@@ -9,10 +9,12 @@ import {
   getInterviewSessionById,
   getInterviewAnswersBySessionId,
 } from '@/lib/supabase/queries';
-import { createInterviewSession, upsertInterviewAnswer, updateInterviewSessionStatus } from '@/lib/supabase/mutations';
+import { createInterviewSession, upsertInterviewAnswer, updateInterviewSessionStatus, saveAnswerEvaluation } from '@/lib/supabase/mutations';
 import { generateInterviewPlan } from '@/lib/ai/openai-interview';
+import { evaluateInterviewAnswer } from '@/lib/ai/openai-evaluation';
 import { hashedSafetyIdentifier } from '@/lib/ai/openai-analysis';
-import { AnalysisResultSchema, SubmitAnswerSchema } from '@/lib/ai/schemas';
+import { AnalysisResultSchema, SubmitAnswerSchema, QuestionRubricSchema } from '@/lib/ai/schemas';
+import { supabaseServer } from '@/lib/supabase/server';
 
 const DEFAULT_MODEL = process.env.OPENAI_ANALYSIS_MODEL || 'gpt-5-mini';
 
@@ -165,6 +167,18 @@ export async function submitAnswerAction({
       });
     }
 
+    // Trigger evaluation asynchronously
+    // Note: We don't await this - evaluation happens in background
+    // UI will show loading state and update via revalidation
+    evaluateAnswerAction({
+      answerId: answer.id,
+      questionId,
+      answerText,
+    }).catch((err) => {
+      console.error('Background evaluation failed:', err);
+      // Silent failure - evaluation can be manually retried if needed
+    });
+
     const { data: allAnswers } = await getInterviewAnswersBySessionId(sessionId);
     const answerCount = allAnswers?.length || 0;
 
@@ -179,5 +193,85 @@ export async function submitAnswerAction({
   } catch (error) {
     console.error('Submit answer error:', error);
     return { error: 'Failed to save answer. Please try again.' };
+  }
+}
+
+export async function evaluateAnswerAction({
+  answerId,
+  questionId,
+  answerText,
+}: {
+  answerId: string;
+  questionId: string;
+  answerText: string;
+}) {
+  const { user } = await getUser();
+  if (!user) {
+    return { error: 'Unauthorized' };
+  }
+
+  try {
+    // Fetch question with rubric
+    const supabase = await supabaseServer();
+    const { data: question, error: questionError } = await supabase
+      .from('interview_questions')
+      .select('question_text, category, context, rubric, session_id')
+      .eq('id', questionId)
+      .single();
+
+    if (questionError || !question) {
+      return { error: 'Question not found' };
+    }
+
+    // Verify user owns this session
+    const { data: session } = await supabase
+      .from('interview_sessions')
+      .select('user_id')
+      .eq('id', question.session_id)
+      .single();
+
+    if (!session || session.user_id !== user.id) {
+      return { error: 'Unauthorized' };
+    }
+
+    // Validate rubric structure
+    const rubricResult = QuestionRubricSchema.safeParse(question.rubric);
+    if (!rubricResult.success) {
+      return { error: 'Invalid rubric data' };
+    }
+
+    // Call AI evaluation
+    const evaluation = await evaluateInterviewAnswer({
+      answerText,
+      questionText: question.question_text,
+      rubric: rubricResult.data,
+      questionCategory: question.category,
+      questionContext: question.context,
+      model: DEFAULT_MODEL,
+      safetyIdentifier: hashedSafetyIdentifier(user.id),
+    });
+
+    // Save evaluation to database
+    const { data: saved, error: saveError } = await saveAnswerEvaluation({
+      answerId,
+      evaluation,
+    });
+
+    if (saveError || !saved) {
+      return { error: saveError?.message || 'Failed to save evaluation' };
+    }
+
+    // Note: Don't call revalidatePath here since this runs async in background
+    // The parent submitAnswerAction already revalidates the path
+
+    return {
+      data: {
+        evaluationScore: evaluation.score,
+        evaluationTier: evaluation.tier,
+      },
+    };
+  } catch (error) {
+    console.error('Evaluation error:', error);
+    return { error: 'Failed to evaluate answer. Please try again.' };
   }
 }
