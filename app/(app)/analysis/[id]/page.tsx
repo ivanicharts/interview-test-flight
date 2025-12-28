@@ -39,29 +39,28 @@ export default async function AnalysisPage({ params }: { params: Promise<{ id: s
 
   return (
     <Section
-      maxWidth="6xl"
-      header={
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary">Analysis Report</Badge>
-            <span className="text-muted-foreground text-xs">
-              {formatDate(analysis.created_at)} · {analysis.model}
-            </span>
-          </div>
-          {!result && (
-            <Badge variant="destructive" className="text-xs">
-              Stored result doesn't match schema — showing raw JSON
-            </Badge>
-          )}
-          <div className="flex flex-wrap gap-2">
-            <Button asChild variant="secondary" size="sm">
-              <Link href={`/documents/${analysis.jd_document_id}`}>Open JD</Link>
-            </Button>
-            <Button asChild variant="secondary" size="sm">
-              <Link href={`/documents/${analysis.cv_document_id}`}>Open CV</Link>
-            </Button>
-          </div>
+      title="Analysis Report"
+      description={
+        <span className="text-muted-foreground text-xs">
+          {formatDate(analysis.created_at)} · {analysis.model}
+        </span>
+      }
+      actions={
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="secondary" size="sm">
+            <Link href={`/documents/${analysis.jd_document_id}`}>Open JD</Link>
+          </Button>
+          <Button asChild variant="secondary" size="sm">
+            <Link href={`/documents/${analysis.cv_document_id}`}>Open CV</Link>
+          </Button>
         </div>
+      }
+      header={
+        !result && (
+          <Badge variant="destructive" className="mt-2 text-xs">
+            Stored result doesn't match schema - showing raw JSON
+          </Badge>
+        )
       }
     >
       {result ? (
