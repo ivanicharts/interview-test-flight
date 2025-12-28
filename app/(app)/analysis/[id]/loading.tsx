@@ -1,46 +1,45 @@
 import { Section } from '@/components/ui/section';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Loading() {
   return (
     <Section
       title="Analysis Report"
-      description={<div className="h-4 w-48 animate-pulse rounded bg-muted" />}
+      description={<Skeleton className="h-4 w-48" />}
       actions={
-        <div className="flex animate-pulse flex-wrap gap-2">
-          <div className="h-8 w-20 rounded bg-muted" />
-          <div className="h-8 w-20 rounded bg-muted" />
+        <div className="flex flex-wrap gap-2">
+          <Skeleton className="h-8 w-20" />
+          <Skeleton className="h-8 w-20" />
         </div>
       }
     >
       <div className="space-y-5">
         {/* Score section skeleton */}
-        <div className="animate-pulse space-y-3">
-          <div className="h-6 w-32 rounded bg-muted" />
-          <div className="h-24 rounded-lg bg-muted/50" />
+        <div className="space-y-3">
+          <Skeleton className="h-6 w-32" />
+          <Skeleton className="h-24 rounded-lg" />
         </div>
 
         {/* Evidence section skeleton */}
-        <div className="animate-pulse space-y-3">
-          <div className="h-6 w-32 rounded bg-muted" />
-          <div className="h-40 rounded-lg bg-muted/50" />
+        <div className="space-y-3">
+          <Skeleton className="h-6 w-32" />
+          <Skeleton className="h-40 rounded-lg" />
         </div>
 
         {/* Gaps section skeleton */}
-        <div className="animate-pulse space-y-3">
-          <div className="h-6 w-40 rounded bg-muted" />
-          <div className="h-32 rounded-lg bg-muted/50" />
+        <div className="space-y-3">
+          <Skeleton className="h-6 w-40" />
+          <Skeleton className="h-32 rounded-lg" />
         </div>
 
         {/* Rewrite suggestions skeleton */}
-        <div className="animate-pulse space-y-3">
-          <div className="h-6 w-48 rounded bg-muted" />
-          <div className="h-32 rounded-lg bg-muted/50" />
+        <div className="space-y-3">
+          <Skeleton className="h-6 w-48" />
+          <Skeleton className="h-32 rounded-lg" />
         </div>
 
         {/* Meta section skeleton */}
-        <div className="animate-pulse space-y-2">
-          <div className="h-4 w-full rounded bg-muted" />
-        </div>
+        <Skeleton className="h-4 w-full" />
       </div>
     </Section>
   );
