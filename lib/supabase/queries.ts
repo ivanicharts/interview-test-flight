@@ -171,3 +171,122 @@ export async function getInterviewQuestionsWithAnswers(sessionId: string) {
 
   return { data: questionsWithAnswers, error: null };
 }
+
+// ==================== Dashboard Queries ====================
+
+export async function getDashboardStats() {
+  const supabase = await supabaseServer();
+
+  const [docsResult, jdCount, cvCount, analysesResult, interviewsResult, inProgressCount] =
+    await Promise.all([
+      supabase.from('documents').select('id', { count: 'exact', head: true }),
+      supabase.from('documents').select('id', { count: 'exact', head: true }).eq('kind', 'jd'),
+      supabase.from('documents').select('id', { count: 'exact', head: true }).eq('kind', 'cv'),
+      supabase.from('analyses').select('match_score'),
+      supabase.from('interview_sessions').select('id', { count: 'exact', head: true }),
+      supabase
+        .from('interview_sessions')
+        .select('id', { count: 'exact', head: true })
+        .in('status', ['pending', 'in_progress']),
+    ]);
+
+  const analyses = analysesResult.data ?? [];
+  const avgScore =
+    analyses.length > 0
+      ? Math.round(analyses.reduce((sum, a) => sum + (a.match_score ?? 0), 0) / analyses.length)
+      : null;
+
+  return {
+    data: {
+      documents: {
+        total: docsResult.count ?? 0,
+        jdCount: jdCount.count ?? 0,
+        cvCount: cvCount.count ?? 0,
+      },
+      analyses: {
+        total: analyses.length,
+        avgScore,
+      },
+      interviews: {
+        total: interviewsResult.count ?? 0,
+        inProgress: inProgressCount.count ?? 0,
+      },
+    },
+    error: null,
+  };
+}
+
+export async function getActiveInterviewSessions() {
+  const supabase = await supabaseServer();
+
+  const { data, error } = await supabase
+    .from('interview_sessions')
+    .select(
+      `
+      id,
+      status,
+      mode,
+      plan,
+      created_at,
+      started_at,
+      analysis:analysis_id(
+        id,
+        match_score,
+        jd_document:jd_document_id(title),
+        cv_document:cv_document_id(title)
+      )
+    `,
+    )
+    .in('status', ['pending', 'in_progress'])
+    .order('created_at', { ascending: false })
+    .limit(3);
+
+  if (error || !data) {
+    return { data: [], error };
+  }
+
+  // For each session, count answered questions
+  const sessionsWithProgress = await Promise.all(
+    data.map(async (session) => {
+      const { count: totalQuestions } = await supabase
+        .from('interview_questions')
+        .select('id', { count: 'exact', head: true })
+        .eq('session_id', session.id);
+
+      const { count: answeredQuestions } = await supabase
+        .from('interview_answers')
+        .select('id', { count: 'exact', head: true })
+        .eq('session_id', session.id)
+        .not('answer_text', 'is', null);
+
+      return {
+        ...session,
+        progress: {
+          total: totalQuestions ?? 0,
+          answered: answeredQuestions ?? 0,
+        },
+      };
+    }),
+  );
+
+  return { data: sessionsWithProgress, error: null };
+}
+
+export async function getRecentAnalyses(limit: number = 3) {
+  const supabase = await supabaseServer();
+
+  return supabase
+    .from('analyses')
+    .select(
+      `
+      id,
+      match_score,
+      created_at,
+      model,
+      jd_document:jd_document_id(title),
+      cv_document:cv_document_id(title)
+    `,
+    )
+    .order('created_at', { ascending: false })
+    .limit(limit);
+}
