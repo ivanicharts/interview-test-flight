@@ -22,7 +22,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <div className="flex flex-1 items-center gap-2 px-3">
             <SidebarTrigger />
             <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
-            <Link href="/dashboard" className="text-lg font-semibold tracking-tight">
+            <Link href="/dashboard" className="text-sm font-semibold tracking-tight md:text-lg">
               Interview Test Flight
             </Link>
             <Separator orientation="vertical" className="mx-2 data-[orientation=vertical]:h-4" />
@@ -32,7 +32,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <NavActions userEmail={user.email ?? null} />
           </div>
         </header>
-        <div className="flex flex-1 flex-col gap-4 px-4 py-10">{children}</div>
+        <div className="bg-card/60 flex flex-1 flex-col gap-4 px-4 py-6 md:py-10">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );

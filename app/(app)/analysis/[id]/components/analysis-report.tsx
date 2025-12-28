@@ -1,89 +1,56 @@
 import type { AnalysisResult } from '@/lib/ai/schemas';
-import { Pill, type PillProps } from '@/components/ui/pill';
+import { Pill } from '@/components/ui/pill';
+import { Progress } from '@/components/ui/progress';
 
-const MATCH_TONE_MAP: Record<AnalysisResult['evidence'][number]['match'], PillProps['tone']> = {
-  strong: 'good',
-  partial: 'warn',
-  missing: 'bad',
-};
-
-const IMPORTANCE_TONE_MAP: Record<AnalysisResult['evidence'][number]['importance'], PillProps['tone']> = {
-  must: 'bad',
-  should: 'warn',
-  nice: 'neutral',
-};
-
-const PRIORITY_TONE_MAP: Record<AnalysisResult['gaps'][number]['priority'], PillProps['tone']> = {
-  high: 'bad',
-  medium: 'warn',
-  low: 'neutral',
-};
+import { IMPORTANCE_TONE_MAP, MATCH_TONE_MAP, PRIORITY_TONE_MAP, getScoreTone } from '../utils';
+import { ReportSection } from './report-section';
+import { ReportCard } from './report-card';
+import { ReportMeta } from './report-meta';
 
 interface AnalysisReportProps {
   result: AnalysisResult;
 }
 
-const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
-  <section className="bg-card rounded-xl border p-4 md:p-5">
-    <h2 className="mb-4 text-xl font-semibold">{title}</h2>
-    <div className="space-y-4">{children}</div>
-  </section>
-);
-
 export function AnalysisReport({ result }: AnalysisReportProps) {
-  const score = result.overallScore;
+  const scoreTone = getScoreTone(result.overallScore);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Score */}
-      <section className="bg-card rounded-xl border p-4 md:p-5">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex-1">
-            <h2 className="text-lg font-semibold">Match score</h2>
-            <p className="text-muted-foreground mt-1 text-sm">{result.summary}</p>
-          </div>
-          <div className="shrink-0 text-left sm:text-right">
-            <div className="text-3xl font-bold">{score}</div>
-            <div className="text-muted-foreground text-xs">out of 100</div>
-          </div>
-        </div>
-
-        <div className="bg-muted mt-4 h-2 w-full overflow-hidden rounded">
-          <div className="bg-primary h-full" style={{ width: `${Math.max(0, Math.min(100, score))}%` }} />
-        </div>
-
+      <ReportSection title="Match score" label={<Pill tone={scoreTone}>{result.overallScore}%</Pill>}>
+        <Progress value={result.overallScore} max={100} tone={scoreTone} />
         {result.strengths?.length > 0 && (
           <div className="mt-4">
             <h3 className="text-sm font-medium">Strengths</h3>
             <ul className="mt-2 grid gap-2 sm:grid-cols-2">
               {result.strengths.map((s, i) => (
-                <li key={i} className="bg-muted/50 rounded-lg border p-3 text-sm">
+                <ReportCard key={i} className="text-sm" as="li">
                   {s}
-                </li>
+                </ReportCard>
               ))}
             </ul>
           </div>
         )}
-      </section>
+      </ReportSection>
 
       {/* Evidence mapping */}
-      <section className="bg-card rounded-xl border p-4 md:p-5">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-lg font-semibold">Evidence mapping</h2>
-          <Pill tone="neutral">{result.evidence.length} requirements</Pill>
-        </div>
-
+      <ReportSection
+        title="Evidence mapping"
+        label={<Pill tone="neutral">{result.evidence.length} requirements</Pill>}
+      >
         {/* Mobile: Card layout */}
-        <div className="mt-4 space-y-3 md:hidden">
+        <div className="space-y-2 md:hidden">
           {result.evidence.map((e, i) => (
-            <div key={i} className="bg-muted/50 rounded-lg border p-3">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex-1 font-medium">{e.requirement}</div>
-                <div className="flex shrink-0 gap-1">
+            <ReportCard
+              key={i}
+              title={e.requirement}
+              label={
+                <>
                   <Pill tone={IMPORTANCE_TONE_MAP[e.importance]}>{e.importance}</Pill>
                   <Pill tone={MATCH_TONE_MAP[e.match]}>{e.match}</Pill>
-                </div>
-              </div>
+                </>
+              }
+            >
               <div className="mt-2 space-y-2 text-sm">
                 <div>
                   <div className="text-muted-foreground text-xs">JD evidence:</div>
@@ -96,12 +63,12 @@ export function AnalysisReport({ result }: AnalysisReportProps) {
                   </div>
                 )}
               </div>
-            </div>
+            </ReportCard>
           ))}
         </div>
 
         {/* Desktop: Table layout */}
-        <div className="mt-4 hidden overflow-x-auto md:block">
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full text-left text-sm">
             <thead className="text-muted-foreground">
               <tr className="border-b">
@@ -129,99 +96,73 @@ export function AnalysisReport({ result }: AnalysisReportProps) {
             </tbody>
           </table>
         </div>
-      </section>
+      </ReportSection>
 
       {/* Gaps */}
-      <section className="bg-card rounded-xl border p-4 md:p-5">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-lg font-semibold">Gaps</h2>
-          <Pill tone="neutral">{result.gaps.length} items</Pill>
-        </div>
-
-        <div className="mt-4 grid gap-3">
-          {result.gaps.map((g, i) => (
-            <div key={i} className="bg-muted/50 rounded-lg border p-3 md:p-4">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div className="font-medium">{g.title}</div>
-                <Pill tone={PRIORITY_TONE_MAP[g.priority]}>{g.priority}</Pill>
-              </div>
-              <p className="text-muted-foreground mt-2 text-sm">{g.whyItMatters}</p>
-              <ul className="mt-3 list-disc space-y-1 pl-5 text-sm">
-                {g.suggestions.map((s, idx) => (
-                  <li key={idx}>{s}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </section>
+      <ReportSection title="Gaps" label={<Pill tone="neutral">{result.gaps.length} items</Pill>}>
+        {result.gaps.map((g, i) => (
+          <ReportCard
+            key={i}
+            title={g.title}
+            description={g.whyItMatters}
+            label={<Pill tone={PRIORITY_TONE_MAP[g.priority]}>{g.priority}</Pill>}
+          >
+            <ul className="list-disc space-y-1 pl-5 text-sm">
+              {g.suggestions.map((s, idx) => (
+                <li key={idx}>{s}</li>
+              ))}
+            </ul>
+          </ReportCard>
+        ))}
+      </ReportSection>
 
       {/* Rewrite suggestions */}
-      <section className="bg-card rounded-xl border p-4 md:p-5">
-        <h2 className="text-lg font-semibold">Rewrite suggestions</h2>
-
+      <ReportSection title="Rewrite suggestions">
         {result.rewriteSuggestions.headline && (
-          <div className="bg-muted/50 mt-3 rounded-lg border p-3 md:p-4">
-            <div className="text-muted-foreground text-sm">Suggested headline</div>
-            <div className="mt-1 font-medium">{result.rewriteSuggestions.headline}</div>
-          </div>
+          <ReportCard description="Suggested headline">
+            <div className="font-medium">{result.rewriteSuggestions.headline}</div>
+          </ReportCard>
         )}
 
-        <div className="mt-4 grid gap-4 lg:grid-cols-2">
-          <div className="bg-muted/50 rounded-lg border p-3 md:p-4">
-            <div className="text-sm font-medium">Summary bullets</div>
-            <ul className="mt-3 list-disc space-y-1 pl-5 text-sm">
+        <div className="grid gap-2 lg:grid-cols-2">
+          <ReportCard subtitle="Summary bullets">
+            <ul className="list-disc space-y-1 pl-5 text-sm">
               {result.rewriteSuggestions.summaryBullets.map((b, i) => (
                 <li key={i}>{b}</li>
               ))}
             </ul>
-          </div>
+          </ReportCard>
 
-          <div className="bg-muted/50 rounded-lg border p-3 md:p-4">
-            <div className="text-sm font-medium">Keyword additions</div>
-            <div className="mt-3 flex flex-wrap gap-2">
+          <ReportCard subtitle="Keyword additions">
+            <div className="flex flex-wrap gap-2">
               {result.rewriteSuggestions.keywordAdditions.map((k, i) => (
                 <Pill key={i} tone="neutral">
                   {k}
                 </Pill>
               ))}
             </div>
-          </div>
+          </ReportCard>
         </div>
 
-        <div className="bg-muted/50 mt-4 rounded-lg border p-3 md:p-4">
-          <div className="text-sm font-medium">Experience bullet upgrades</div>
-          <div className="mt-3 space-y-3">
-            {result.rewriteSuggestions.experienceBullets.map((b, i) => (
-              <div key={i} className="bg-card rounded-md border p-3">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="text-sm font-medium">{b.section}</div>
-                  <Pill tone="neutral">rewrite</Pill>
-                </div>
-                <div className="mt-2 text-sm">{b.after}</div>
-                <div className="text-muted-foreground mt-2 text-xs">{b.rationale}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+        <ReportCard subtitle="Experience bullet upgrades">
+          {result.rewriteSuggestions.experienceBullets.map((b, i) => (
+            <ReportCard
+              key={i}
+              variant="secondary"
+              title={b.section}
+              label={<Pill tone="neutral">rewrite</Pill>}
+            >
+              <div className="mt-2 text-sm">{b.after}</div>
+              <div className="text-muted-foreground mt-2 text-xs">{b.rationale}</div>
+            </ReportCard>
+          ))}
+        </ReportCard>
+      </ReportSection>
 
       {/* Meta */}
-      <section className="bg-card text-muted-foreground rounded-xl border p-4 text-xs">
-        <div className="flex flex-wrap gap-x-4 gap-y-1">
-          <span>Model: {result.meta.model}</span>
-          <span>JD chars: {result.meta.inputChars.jd}</span>
-          <span>CV chars: {result.meta.inputChars.cv}</span>
-          <span>Generated: {result.meta.generatedAt}</span>
-        </div>
-        {result.meta.warnings?.length > 0 && (
-          <ul className="mt-2 list-disc pl-5">
-            {result.meta.warnings.map((w, i) => (
-              <li key={i}>{w}</li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <ReportSection>
+        <ReportMeta meta={result.meta} />
+      </ReportSection>
     </div>
   );
 }

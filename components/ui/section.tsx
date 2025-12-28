@@ -25,10 +25,12 @@ const maxWidthClasses = {
 
 export function Section({ title, description, header, children, className, maxWidth = '5xl' }: SectionProps) {
   return (
-    <div className={`mx-auto w-full ${maxWidthClasses[maxWidth]} p-4 md:p-8 ${className || ''}`}>
-      <Card className="border-border/60 bg-card/60 backdrop-blur">
+    // p-4 md:p-8
+    <div className={`mx-auto w-full ${maxWidthClasses[maxWidth]} ${className || ''}`}>
+      {/* <Card className="border-border/60 bg-card/60 py-4 backdrop-blur md:py-6"> */}
+      <Card className="gap-3 border-none bg-transparent py-0 shadow-none md:gap-6">
         {(title || description || header) && (
-          <CardHeader>
+          <CardHeader className="px-0">
             {header ? (
               header
             ) : (
@@ -39,7 +41,7 @@ export function Section({ title, description, header, children, className, maxWi
             )}
           </CardHeader>
         )}
-        <CardContent>{children}</CardContent>
+        <CardContent className="px-0">{children}</CardContent>
       </Card>
     </div>
   );
