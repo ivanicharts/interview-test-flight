@@ -1,7 +1,7 @@
 import { redirect, notFound } from 'next/navigation';
 import { z } from 'zod';
 
-import { getUser, getInterviewSessionById } from '@/lib/supabase/queries';
+import { getUser, getInterviewSessionById, getInterviewQuestionsWithAnswers } from '@/lib/supabase/queries';
 import { InterviewPlanSchema } from '@/lib/ai/schemas';
 import { PageSection } from '@/components/ui/page-section';
 import { Badge } from '@/components/ui/badge';
@@ -57,6 +57,19 @@ export default async function InterviewPage({ params }: { params: Promise<{ id: 
 
   const plan = planResult.data;
 
+  // Fetch questions with answers
+  const { data: questionsWithAnswers, error: questionsError } = await getInterviewQuestionsWithAnswers(id);
+
+  if (questionsError || !questionsWithAnswers) {
+    return (
+      <PageSection title="Interview Session" description="Error loading questions">
+        <div className="rounded-md border border-destructive/60 bg-destructive/10 p-4 text-destructive">
+          Failed to load interview questions. Please try refreshing the page.
+        </div>
+      </PageSection>
+    );
+  }
+
   const statusVariant =
     session.status === 'completed'
       ? 'default'
@@ -93,7 +106,7 @@ export default async function InterviewPage({ params }: { params: Promise<{ id: 
         </div>
       }
     >
-      <InterviewPlayer plan={plan} />
+      <InterviewPlayer plan={plan} sessionId={id} questionsWithAnswers={questionsWithAnswers} />
     </PageSection>
   );
 }

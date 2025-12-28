@@ -2,11 +2,17 @@
 
 import { revalidatePath } from 'next/cache';
 import { getUser } from '@/lib/supabase/queries';
-import { getAnalysisById, getDocumentsByIds, getActiveInterviewForAnalysis } from '@/lib/supabase/queries';
-import { createInterviewSession } from '@/lib/supabase/mutations';
+import {
+  getAnalysisById,
+  getDocumentsByIds,
+  getActiveInterviewForAnalysis,
+  getInterviewSessionById,
+  getInterviewAnswersBySessionId,
+} from '@/lib/supabase/queries';
+import { createInterviewSession, upsertInterviewAnswer, updateInterviewSessionStatus } from '@/lib/supabase/mutations';
 import { generateInterviewPlan } from '@/lib/ai/openai-interview';
 import { hashedSafetyIdentifier } from '@/lib/ai/openai-analysis';
-import { AnalysisResultSchema } from '@/lib/ai/schemas';
+import { AnalysisResultSchema, SubmitAnswerSchema } from '@/lib/ai/schemas';
 
 const DEFAULT_MODEL = process.env.OPENAI_ANALYSIS_MODEL || 'gpt-5-mini';
 
@@ -107,5 +113,71 @@ export async function createInterviewAction({
   } catch (error) {
     console.error('Interview generation error:', error);
     return { error: 'Failed to generate interview plan. Please try again.' };
+  }
+}
+
+export async function submitAnswerAction({
+  sessionId,
+  questionId,
+  answerText,
+  answerMode = 'text',
+}: {
+  sessionId: string;
+  questionId: string;
+  answerText: string;
+  answerMode?: 'text' | 'audio';
+}) {
+  const { user } = await getUser();
+  if (!user) {
+    return { error: 'Unauthorized' };
+  }
+
+  const validationResult = SubmitAnswerSchema.safeParse({
+    sessionId,
+    questionId,
+    answerText,
+    answerMode,
+  });
+
+  if (!validationResult.success) {
+    return { error: validationResult.error.issues[0].message };
+  }
+
+  try {
+    const { data: answer, error: answerError } = await upsertInterviewAnswer({
+      sessionId,
+      questionId,
+      answerText,
+      answerMode,
+    });
+
+    if (answerError || !answer) {
+      return { error: answerError?.message || 'Failed to save answer' };
+    }
+
+    // Check if session is 'pending' - if so, transition to 'in_progress'
+    const { data: session, error: sessionError } = await getInterviewSessionById(sessionId);
+
+    if (!sessionError && session && session.status === 'pending') {
+      await updateInterviewSessionStatus({
+        sessionId,
+        status: 'in_progress',
+      });
+    }
+
+    const { data: allAnswers } = await getInterviewAnswersBySessionId(sessionId);
+    const answerCount = allAnswers?.length || 0;
+
+    revalidatePath(`/interviews/${sessionId}`);
+
+    return {
+      data: {
+        answerId: answer.id,
+        answerCount,
+      },
+    };
+  } catch (error) {
+    console.error('Submit answer error:', error);
+    return { error: 'Failed to save answer. Please try again.' };
   }
 }

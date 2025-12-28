@@ -133,3 +133,32 @@ export async function updateInterviewSessionStatus({
 
   return supabase.from('interview_sessions').update(updates).eq('id', sessionId).select('id').single();
 }
+
+export async function upsertInterviewAnswer({
+  sessionId,
+  questionId,
+  answerText,
+  answerMode = 'text',
+}: {
+  sessionId: string;
+  questionId: string;
+  answerText: string;
+  answerMode?: 'text' | 'audio';
+}) {
+  const supabase = await supabaseServer();
+
+  return supabase
+    .from('interview_answers')
+    .upsert(
+      {
+        session_id: sessionId,
+        question_id: questionId,
+        answer_text: answerText,
+        answer_mode: answerMode,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'session_id,question_id' },
+    )
+    .select('id')
+    .single();
+}

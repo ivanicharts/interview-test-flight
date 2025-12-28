@@ -130,3 +130,44 @@ export async function getActiveInterviewForAnalysis(analysisId: string) {
     .limit(1)
     .maybeSingle();
 }
+
+export async function getInterviewAnswersBySessionId(sessionId: string) {
+  const supabase = await supabaseServer();
+  return supabase
+    .from('interview_answers')
+    .select('id, question_id, answer_text, answer_audio_url, answer_mode, created_at, updated_at')
+    .eq('session_id', sessionId)
+    .order('created_at', { ascending: true });
+}
+
+export async function getInterviewQuestionsWithAnswers(sessionId: string) {
+  const supabase = await supabaseServer();
+
+  const { data: questions, error: questionsError } = await supabase
+    .from('interview_questions')
+    .select('id, order_index, category, question_text, context, rubric, target_gap, target_strength')
+    .eq('session_id', sessionId)
+    .order('order_index', { ascending: true });
+
+  if (questionsError || !questions) {
+    return { data: null, error: questionsError };
+  }
+
+  const { data: answers, error: answersError } = await supabase
+    .from('interview_answers')
+    .select('question_id, answer_text, answer_audio_url, answer_mode, created_at, updated_at')
+    .eq('session_id', sessionId);
+
+  if (answersError) {
+    return { data: null, error: answersError };
+  }
+
+  const answerMap = new Map((answers || []).map((answer) => [answer.question_id, answer]));
+
+  const questionsWithAnswers = questions.map((question) => ({
+    ...question,
+    answer: answerMap.get(question.id) || null,
+  }));
+
+  return { data: questionsWithAnswers, error: null };
+}

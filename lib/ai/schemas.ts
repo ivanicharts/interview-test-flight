@@ -160,3 +160,14 @@ export const CreateInterviewRequestSchema = z.object({
   mode: z.enum(['text', 'audio']).optional().default('text'),
   focusAreas: z.array(z.string()).optional(),
 });
+
+// ==================== Interview Answer Schemas ====================
+
+export const SubmitAnswerSchema = z.object({
+  sessionId: z.string().uuid(),
+  questionId: z.string().uuid(),
+  answerText: z.string().min(10, 'Answer must be at least 10 characters').max(5000, 'Answer too long'),
+  answerMode: z.enum(['text', 'audio']).default('text'),
+});
+
+export type SubmitAnswerInput = z.infer<typeof SubmitAnswerSchema>;
