@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { formatDate } from '@/lib/utils';
 import { getAnalyses, getUser } from '@/lib/supabase/queries';
-import { Section } from '@/components/ui/section';
+import { PageSection } from '@/components/ui/page-section';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
@@ -20,7 +20,7 @@ export default async function AnalysesPage() {
   }
 
   return (
-    <Section
+    <PageSection
       title="Analyses"
       description="Your match reports."
       actions={
@@ -59,6 +59,6 @@ export default async function AnalysesPage() {
           ))}
         </div>
       )}
-    </Section>
+    </PageSection>
   );
 }

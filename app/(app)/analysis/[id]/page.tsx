@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { AnalysisResultSchema } from '@/lib/ai/schemas';
 import { formatDate } from '@/lib/utils';
 import { getAnalysisById, getUser } from '@/lib/supabase/queries';
-import { Section } from '@/components/ui/section';
+import { PageSection } from '@/components/ui/page-section';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
@@ -38,7 +38,7 @@ export default async function AnalysisPage({ params }: { params: Promise<{ id: s
   const result = parsedResult.success ? parsedResult.data : null;
 
   return (
-    <Section
+    <PageSection
       title="Analysis Report"
       description={
         <span className="text-muted-foreground text-xs">
@@ -76,6 +76,6 @@ export default async function AnalysisPage({ params }: { params: Promise<{ id: s
           </pre>
         </div>
       )}
-    </Section>
+    </PageSection>
   );
 }

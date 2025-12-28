@@ -2,7 +2,7 @@ import { notFound, redirect } from 'next/navigation';
 
 import { Badge } from '@/components/ui/badge';
 import { CardTitle } from '@/components/ui/card';
-import { Section } from '@/components/ui/section';
+import { PageSection } from '@/components/ui/page-section';
 import { getUser, getDocumentById } from '@/lib/supabase/queries';
 
 function kindLabel(kind: string) {
@@ -25,7 +25,7 @@ export default async function DocumentViewPage({ params }: { params: Promise<{ i
   }
 
   return (
-    <Section
+    <PageSection
       header={
         <>
           <div className="flex items-center gap-2">
@@ -37,6 +37,6 @@ export default async function DocumentViewPage({ params }: { params: Promise<{ i
       }
     >
       <div className="prose prose-invert max-w-none text-sm leading-6 whitespace-pre-wrap">{doc.content}</div>
-    </Section>
+    </PageSection>
   );
 }

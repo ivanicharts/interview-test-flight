@@ -1,9 +1,9 @@
-import { Section } from '@/components/ui/section';
+import { PageSection } from '@/components/ui/page-section';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Loading() {
   return (
-    <Section
+    <PageSection
       header={
         <>
           <div className="flex items-center gap-2">
@@ -19,6 +19,6 @@ export default function Loading() {
           <Skeleton key={i} className="h-4" style={{ width: `${Math.random() * 30 + 70}%` }} />
         ))}
       </div>
-    </Section>
+    </PageSection>
   );
 }

@@ -1,9 +1,9 @@
-import { Section } from '@/components/ui/section';
+import { PageSection } from '@/components/ui/page-section';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Loading() {
   return (
-    <Section title="Documents" description="Your pasted Job Descriptions and CV versions.">
+    <PageSection title="Documents" description="Your pasted Job Descriptions and CV versions.">
       <div className="space-y-4">
         {/* Top controls skeleton */}
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -37,6 +37,6 @@ export default function Loading() {
           ))}
         </div>
       </div>
-    </Section>
+    </PageSection>
   );
 }

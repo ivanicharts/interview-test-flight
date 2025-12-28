@@ -1,9 +1,9 @@
-import { Section } from '@/components/ui/section';
+import { PageSection } from '@/components/ui/page-section';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Loading() {
   return (
-    <Section
+    <PageSection
       title="Analysis Report"
       description={<Skeleton className="h-4 w-48" />}
       actions={
@@ -41,6 +41,6 @@ export default function Loading() {
         {/* Meta section skeleton */}
         <Skeleton className="h-4 w-full" />
       </div>
-    </Section>
+    </PageSection>
   );
 }

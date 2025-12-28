@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, FileText, FlaskConical, Settings } from 'lucide-react';
+import { LayoutDashboard, FileText, FlaskConical, MessageSquare, Settings } from 'lucide-react';
 
 import { NavMain } from '@/components/nav-main';
 import { Sidebar, SidebarHeader } from '@/components/ui/sidebar';
@@ -10,6 +10,7 @@ const navItems = [
   { url: '/dashboard', title: 'Dashboard', icon: LayoutDashboard },
   { url: '/documents', title: 'Documents', icon: FileText },
   { url: '/analysis', title: 'Analyses', icon: FlaskConical },
+  { url: '/interviews', title: 'Interviews', icon: MessageSquare },
   { url: '/settings', title: 'Settings', icon: Settings },
 ];
 

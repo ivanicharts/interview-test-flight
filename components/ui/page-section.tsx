@@ -24,7 +24,7 @@ const maxWidthClasses = {
   full: 'max-w-full',
 };
 
-export function Section({
+export function PageSection({
   title,
   description,
   header,

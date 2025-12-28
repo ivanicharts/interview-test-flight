@@ -4,7 +4,7 @@ import * as React from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTransition } from 'react';
 
-import { Section } from '@/components/ui/section';
+import { PageSection } from '@/components/ui/page-section';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -47,7 +47,7 @@ export default function NewDocumentPage() {
   }
 
   return (
-    <Section title="New document" description="Paste the text for your Job Description or CV.">
+    <PageSection title="New document" description="Paste the text for your Job Description or CV.">
       <form onSubmit={onSubmit} className="space-y-6">
         <Tabs value={documentType} onValueChange={(v) => setDocumentType(v as DocumentType)}>
           <TabsList>
@@ -64,7 +64,9 @@ export default function NewDocumentPage() {
           <Label htmlFor="title">Title</Label>
           <Input
             id="title"
-            placeholder={documentType === 'jd' ? 'e.g. Senior Frontend Engineer (Company X)' : 'e.g. John Doe CV v1'}
+            placeholder={
+              documentType === 'jd' ? 'e.g. Senior Frontend Engineer (Company X)' : 'e.g. John Doe CV v1'
+            }
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             autoComplete="off"
@@ -79,7 +81,9 @@ export default function NewDocumentPage() {
           </div>
           <Textarea
             id="content"
-            placeholder={documentType === 'jd' ? 'Paste the job description here...' : 'Paste your CV here...'}
+            placeholder={
+              documentType === 'jd' ? 'Paste the job description here...' : 'Paste your CV here...'
+            }
             value={content}
             onChange={(e) => setContent(e.target.value)}
             className="max-h-100 min-h-80 resize-y"
@@ -106,6 +110,6 @@ export default function NewDocumentPage() {
           </Button>
         </div>
       </form>
-    </Section>
+    </PageSection>
   );
 }

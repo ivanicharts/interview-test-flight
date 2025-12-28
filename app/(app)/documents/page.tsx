@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 
-import { Section } from '@/components/ui/section';
+import { PageSection } from '@/components/ui/page-section';
 import { getUser, getDocuments } from '@/lib/supabase/queries';
 import DocumentListClient from './components/document-list';
 
@@ -15,8 +15,8 @@ export default async function DocumentsPage() {
   }
 
   return (
-    <Section title="Documents" description="Your pasted Job Descriptions and CV versions.">
+    <PageSection title="Documents" description="Your pasted Job Descriptions and CV versions.">
       <DocumentListClient initialDocs={docs ?? []} />
-    </Section>
+    </PageSection>
   );
 }

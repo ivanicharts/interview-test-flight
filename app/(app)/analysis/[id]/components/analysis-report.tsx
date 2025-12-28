@@ -1,9 +1,9 @@
 import type { AnalysisResult } from '@/lib/ai/schemas';
 import { Pill } from '@/components/ui/pill';
 import { Progress } from '@/components/ui/progress';
+import { ContentSection } from '@/components/ui/content-section';
 
 import { IMPORTANCE_TONE_MAP, MATCH_TONE_MAP, PRIORITY_TONE_MAP, getScoreTone } from '../utils';
-import { ReportSection } from './report-section';
 import { ReportCard } from './report-card';
 import { ReportMeta } from './report-meta';
 
@@ -17,7 +17,7 @@ export function AnalysisReport({ result }: AnalysisReportProps) {
   return (
     <div className="space-y-5">
       {/* Score */}
-      <ReportSection title="Match score" label={<Pill tone={scoreTone}>{result.overallScore}%</Pill>}>
+      <ContentSection title="Match score" label={<Pill tone={scoreTone}>{result.overallScore}%</Pill>}>
         <Progress value={result.overallScore} max={100} tone={scoreTone} />
         {result.strengths?.length > 0 && (
           <div className="mt-4">
@@ -31,10 +31,10 @@ export function AnalysisReport({ result }: AnalysisReportProps) {
             </ul>
           </div>
         )}
-      </ReportSection>
+      </ContentSection>
 
       {/* Evidence mapping */}
-      <ReportSection
+      <ContentSection
         title="Evidence mapping"
         label={<Pill tone="neutral">{result.evidence.length} requirements</Pill>}
       >
@@ -96,10 +96,10 @@ export function AnalysisReport({ result }: AnalysisReportProps) {
             </tbody>
           </table>
         </div>
-      </ReportSection>
+      </ContentSection>
 
       {/* Gaps */}
-      <ReportSection title="Gaps" label={<Pill tone="neutral">{result.gaps.length} items</Pill>}>
+      <ContentSection title="Gaps" label={<Pill tone="neutral">{result.gaps.length} items</Pill>}>
         {result.gaps.map((g, i) => (
           <ReportCard
             key={i}
@@ -114,10 +114,10 @@ export function AnalysisReport({ result }: AnalysisReportProps) {
             </ul>
           </ReportCard>
         ))}
-      </ReportSection>
+      </ContentSection>
 
       {/* Rewrite suggestions */}
-      <ReportSection title="Rewrite suggestions">
+      <ContentSection title="Rewrite suggestions">
         {result.rewriteSuggestions.headline && (
           <ReportCard description="Suggested headline">
             <div className="font-medium">{result.rewriteSuggestions.headline}</div>
@@ -157,12 +157,12 @@ export function AnalysisReport({ result }: AnalysisReportProps) {
             </ReportCard>
           ))}
         </ReportCard>
-      </ReportSection>
+      </ContentSection>
 
       {/* Meta */}
-      <ReportSection>
+      <ContentSection>
         <ReportMeta meta={result.meta} />
-      </ReportSection>
+      </ContentSection>
     </div>
   );
 }
