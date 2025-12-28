@@ -35,7 +35,7 @@ const SubmitForm = ({ onSubmit, onGoBack, onRetry, email, loading }: Props) => {
       <div className="grid">
         <Label>Email</Label>
         <div className="flex items-center justify-between gap-2">
-          <div className="text-muted-foreground truncate text-sm">{email.trim()}</div>
+          <div className="text-muted-foreground line-clamp-1 text-sm">{email.trim()}</div>
           <Button type="button" variant="ghost" size="sm" onClick={onGoBack}>
             Change
           </Button>

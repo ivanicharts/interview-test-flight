@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { getUser } from '@/lib/supabase/queries';
-import { createDocument } from '@/lib/supabase/mutations';
+import { createDocument, deleteDocument } from '@/lib/supabase/mutations';
 import { DocumentType } from '@/lib/types';
 
 type CreateDocumentInput = {
@@ -49,4 +49,18 @@ export async function createDocumentAction({
   revalidatePath(`/documents/${data.id}`);
 
   return { data: { id: data.id } };
+}
+
+export async function deleteDocumentAction(id: string) {
+  // Delete the document (RLS will ensure user can only delete their own)
+  const { error } = await deleteDocument({ id });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  // Revalidate the documents page to reflect the deletion
+  revalidatePath('/documents');
+
+  return { success: true };
 }

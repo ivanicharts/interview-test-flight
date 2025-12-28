@@ -54,9 +54,9 @@ export function DocumentPicker({
             >
               <div className="flex items-center gap-2">
                 <Badge variant="secondary">{d.title ? 'Titled' : 'Untitled'}</Badge>
-                <div className="truncate font-medium">{d.title || '(Untitled)'}</div>
+                <div className="line-clamp-1 font-medium">{d.title || '(Untitled)'}</div>
               </div>
-              <div className="text-muted-foreground mt-1 truncate text-xs">{preview(d.content)}</div>
+              <div className="text-muted-foreground mt-1 line-clamp-1 text-xs">{preview(d.content)}</div>
               <div className="text-muted-foreground mt-1 text-[11px]">
                 Updated: {new Date(d.updated_at).toLocaleString(['en-US'])}
               </div>

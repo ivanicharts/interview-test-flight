@@ -5,6 +5,7 @@ import { getUser } from '@/lib/supabase/queries';
 import { PageSection } from '@/components/ui/page-section';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { List, ListItem, ListItemContent } from '@/components/ui/list';
 
 export default async function InterviewsPage() {
   const { user } = await getUser();
@@ -41,10 +42,10 @@ export default async function InterviewsPage() {
           </Button>
         </div>
       ) : (
-        <div className="divide-border/60 border-border/60 divide-y overflow-hidden rounded-md border">
+        <List>
           {sessions.map((session: any) => (
-            <div key={session.id} className="flex items-center justify-between gap-3 p-4">
-              <div className="min-w-0 flex-1">
+            <ListItem key={session.id}>
+              <ListItemContent>
                 <div className="flex items-center gap-2">
                   <Badge
                     variant={
@@ -61,7 +62,10 @@ export default async function InterviewsPage() {
                         ? 'In Progress'
                         : 'Pending'}
                   </Badge>
-                  <Link href={`/interviews/${session.id}`} className="truncate font-medium hover:underline">
+                  <Link
+                    href={`/interviews/${session.id}`}
+                    className="line-clamp-1 font-medium hover:underline"
+                  >
                     {session.analysis?.jd_document?.title || 'Interview Session'}
                   </Link>
                 </div>
@@ -70,15 +74,15 @@ export default async function InterviewsPage() {
                   {session.mode && ` • ${session.mode}`}
                   {session.completed_at && ` • Completed ${formatDate(session.completed_at)}`}
                 </div>
-              </div>
+              </ListItemContent>
               <Button asChild variant="secondary" size="sm">
                 <Link href={`/interviews/${session.id}`}>
                   {session.status === 'completed' ? 'Review' : 'Continue'}
                 </Link>
               </Button>
-            </div>
+            </ListItem>
           ))}
-        </div>
+        </List>
       )}
     </PageSection>
   );

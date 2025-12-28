@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 
 import { PageSection } from '@/components/ui/page-section';
 import { getUser, getDocuments } from '@/lib/supabase/queries';
-import AnalysisCreateClient from './components/analysis-submit-form';
+import AnalysisSubmitForm from './components/analysis-submit-form';
 
 export default async function NewAnalysisPage() {
   const { user } = await getUser();
@@ -25,7 +25,7 @@ export default async function NewAnalysisPage() {
       title="New analysis"
       description="Select a Job Description and a CV, then generate a match report."
     >
-      <AnalysisCreateClient jds={jds} cvs={cvs} />
+      <AnalysisSubmitForm jds={jds} cvs={cvs} />
     </PageSection>
   );
 }

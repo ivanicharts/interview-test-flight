@@ -8,7 +8,7 @@ export default async function DocumentsPage() {
   const { user } = await getUser();
   if (!user) redirect('/login');
 
-  const { data: docs, error } = await getDocuments();
+  const { data: docs, error } = await getDocuments({ maxContentLength: 200 });
 
   if (error) {
     throw new Error(error.message);

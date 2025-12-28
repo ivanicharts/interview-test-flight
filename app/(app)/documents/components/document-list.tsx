@@ -7,53 +7,37 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import { List, ListItem, ListItemContent, ListItemActions } from '@/components/ui/list';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { Document } from '@/lib/types';
+import { deleteDocumentAction } from '../actions';
 
-type Doc = {
-  id: string;
-  kind: 'jd' | 'cv';
-  title: string | null;
-  content: string;
-  created_at: string;
-  updated_at: string;
-};
-
-function label(kind: Doc['kind']) {
+function label(kind: Document['kind']) {
   return kind === 'cv' ? 'CV' : 'Job Description';
 }
 
-function preview(text: string) {
-  const t = text.trim().replace(/\s+/g, ' ');
-  return t.length > 160 ? `${t.slice(0, 160)}…` : t;
-}
-
-export default function DocumentListClient({ initialDocs }: { initialDocs: Doc[] }) {
-  const [docs, setDocs] = React.useState<Doc[]>(initialDocs);
+export default function DocumentListClient({ initialDocs }: { initialDocs: Document[] }) {
+  const [docs, setDocs] = React.useState<Document[]>(initialDocs);
   const [tab, setTab] = React.useState<'all' | 'jd' | 'cv'>('all');
-  const [q, setQ] = React.useState('');
-  const [busyId, setBusyId] = React.useState<string | null>(null);
+  const [query, setQuery] = React.useState('');
+  const [isPending, startTransition] = React.useTransition();
   const [confirmId, setConfirmId] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
 
   const filtered = React.useMemo(() => {
-    const query = q.trim().toLowerCase();
+    const cleanQuery = query.trim().toLowerCase();
     return docs.filter((d) => {
-      if (tab !== 'all' && d.kind !== tab) return false;
-      if (!query) return true;
+      if (tab !== 'all' && d.kind !== tab) {
+        return false;
+      }
+      if (!cleanQuery) {
+        return true;
+      }
 
       const hay = `${d.title ?? ''} ${d.content}`.toLowerCase();
-      return hay.includes(query);
+      return hay.includes(cleanQuery);
     });
-  }, [docs, tab, q]);
+  }, [docs, tab, query]);
 
   const counts = React.useMemo(() => {
     const jd = docs.filter((d) => d.kind === 'jd').length;
@@ -63,18 +47,15 @@ export default function DocumentListClient({ initialDocs }: { initialDocs: Doc[]
 
   async function doDelete(id: string) {
     setError(null);
-    setBusyId(id);
-    try {
-      const res = await fetch(`/api/documents/${id}`, { method: 'DELETE' });
-      const json = (await res.json()) as { ok?: boolean; error?: string };
-      if (!res.ok) throw new Error(json.error || 'Failed to delete');
-      setDocs((prev) => prev.filter((d) => d.id !== id));
-    } catch (e: any) {
-      setError(e?.message ?? 'Something went wrong');
-    } finally {
-      setBusyId(null);
+    startTransition(async () => {
+      const result = await deleteDocumentAction(id);
+      if (result.error) {
+        setError(result.error);
+      } else {
+        setDocs((prev) => prev.filter((d) => d.id !== id));
+      }
       setConfirmId(null);
-    }
+    });
   }
 
   return (
@@ -92,8 +73,8 @@ export default function DocumentListClient({ initialDocs }: { initialDocs: Doc[]
 
           <Input
             placeholder="Search title or content…"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
             className="md:w-[320px]"
           />
         </div>
@@ -102,13 +83,15 @@ export default function DocumentListClient({ initialDocs }: { initialDocs: Doc[]
           <Button asChild variant="secondary">
             <Link href="/documents/new?kind=jd">New JD</Link>
           </Button>
-          <Button asChild>
+          <Button asChild variant="secondary">
             <Link href="/documents/new?kind=cv">New CV</Link>
           </Button>
         </div>
       </div>
 
-      {error ? <div className="border-border/60 bg-muted/30 rounded-md border p-3 text-sm">{error}</div> : null}
+      {error ? (
+        <div className="border-border/60 bg-muted/30 rounded-md border p-3 text-sm">{error}</div>
+      ) : null}
 
       {/* list */}
       {filtered.length === 0 ? (
@@ -118,64 +101,62 @@ export default function DocumentListClient({ initialDocs }: { initialDocs: Doc[]
             <Button asChild variant="secondary">
               <Link href="/documents/new?kind=jd">Add a JD</Link>
             </Button>
-            <Button asChild>
+            <Button asChild variant="secondary">
               <Link href="/documents/new?kind=cv">Add a CV</Link>
             </Button>
           </div>
         </div>
       ) : (
-        <div className="divide-border/60 border-border/60 divide-y overflow-hidden rounded-md border">
+        <List>
           {filtered.map((d) => (
-            <div key={d.id} className="flex flex-col gap-2 p-4 md:flex-row md:items-center md:justify-between">
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
+            <ListItem key={d.id} className="flex-row md:items-center">
+              <ListItemContent>
+                <div className="flex flex-wrap items-center gap-2">
                   <Badge variant="secondary">{label(d.kind)}</Badge>
                   <Link
                     href={`/documents/${d.id}`}
-                    className="truncate font-medium hover:underline"
+                    className="line-clamp-1 font-medium hover:underline"
                     title={d.title ?? undefined}
                   >
                     {d.title || '(Untitled)'}
                   </Link>
                 </div>
 
-                <div className="text-muted-foreground mt-1 truncate text-sm">{preview(d.content)}</div>
+                <div className="text-muted-foreground mt-1 line-clamp-1 text-sm">{d.content}</div>
 
                 <div className="text-muted-foreground mt-1 text-xs">
                   Updated: {new Date(d.updated_at).toLocaleString('en')}
                 </div>
-              </div>
+              </ListItemContent>
 
-              <div className="flex shrink-0 gap-2">
+              <ListItemActions className="flex flex-col md:flex-row">
                 <Button asChild variant="secondary" size="sm">
                   <Link href={`/documents/${d.id}`}>Open</Link>
                 </Button>
-                <Button variant="destructive" size="sm" disabled={busyId === d.id} onClick={() => setConfirmId(d.id)}>
-                  {busyId === d.id ? 'Deleting…' : 'Delete'}
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  disabled={isPending}
+                  onClick={() => setConfirmId(d.id)}
+                >
+                  Delete
                 </Button>
-              </div>
-            </div>
+              </ListItemActions>
+            </ListItem>
           ))}
-        </div>
+        </List>
       )}
 
-      {/* confirm dialog */}
-      <AlertDialog open={!!confirmId} onOpenChange={(o) => !o && setConfirmId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete this document?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently remove it. Related analyses may be removed too (privacy-first).
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={!!busyId}>Cancel</AlertDialogCancel>
-            <AlertDialogAction disabled={!confirmId || !!busyId} onClick={() => confirmId && doDelete(confirmId)}>
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDialog
+        open={!!confirmId}
+        onOpenChange={(open) => !open && setConfirmId(null)}
+        title="Delete this document?"
+        description="This will permanently remove it. Related analyses may be removed too."
+        confirmText="Delete"
+        variant="destructive"
+        disabled={isPending}
+        onConfirm={() => confirmId && doDelete(confirmId)}
+      />
     </div>
   );
 }

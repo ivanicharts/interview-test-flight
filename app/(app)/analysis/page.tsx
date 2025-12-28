@@ -5,6 +5,7 @@ import { getAnalyses, getUser } from '@/lib/supabase/queries';
 import { PageSection } from '@/components/ui/page-section';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { List, ListItem, ListItemContent } from '@/components/ui/list';
 
 export default async function AnalysesPage() {
   const { user } = await getUser();
@@ -37,13 +38,13 @@ export default async function AnalysesPage() {
           </Button>
         </div>
       ) : (
-        <div className="divide-border/60 border-border/60 divide-y overflow-hidden rounded-md border">
+        <List>
           {analyses!.map((a) => (
-            <div key={a.id} className="flex items-center justify-between gap-3 p-4">
-              <div className="min-w-0 flex-1">
+            <ListItem key={a.id}>
+              <ListItemContent>
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary">{a.match_score ?? 0}/100</Badge>
-                  <Link href={`/analysis/${a.id}`} className="truncate font-medium hover:underline">
+                  <Link href={`/analysis/${a.id}`} className="line-clamp-1 font-medium hover:underline">
                     {(a.jd_document as any)?.title || 'Job Description'} -{' '}
                     {(a.cv_document as any)?.title || 'CV'}
                   </Link>
@@ -51,13 +52,13 @@ export default async function AnalysesPage() {
                 <div className="text-muted-foreground mt-1 text-xs">
                   {formatDate(a.created_at)} • {a.model ?? 'gpt-5-mini'}
                 </div>
-              </div>
+              </ListItemContent>
               <Button asChild variant="secondary" size="sm">
                 <Link href={`/analysis/${a.id}`}>Open</Link>
               </Button>
-            </div>
+            </ListItem>
           ))}
-        </div>
+        </List>
       )}
     </PageSection>
   );

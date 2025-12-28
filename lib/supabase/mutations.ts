@@ -51,3 +51,8 @@ export async function createDocument({
     .select('id')
     .single();
 }
+
+export async function deleteDocument({ id }: { id: string }) {
+  const supabase = await supabaseServer();
+  return supabase.from('documents').delete().eq('id', id);
+}
