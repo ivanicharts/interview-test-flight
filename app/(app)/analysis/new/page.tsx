@@ -10,7 +10,6 @@ export default async function NewAnalysisPage() {
     redirect('/login');
   }
 
-  // Only fetch first 200 chars of content for preview (DocumentPicker uses 140)
   const { data: docs, error } = await getDocuments({ maxContentLength: 200 });
 
   if (error) {
