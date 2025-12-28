@@ -22,7 +22,7 @@ const isValidToken = (token: string) => {
   return /^\d{8}$/.test(token); // simple 6-digit check
 };
 
-export default function LoginPage() {
+function OtpLoginPageContent() {
   const router = useRouter();
   const search = useSearchParams();
   const next = search.get('next') || '/dashboard';
@@ -137,5 +137,19 @@ export default function LoginPage() {
         </Link>
       </Button>
     </div>
+  );
+}
+
+export default function OtpLoginPage() {
+  return (
+    <React.Suspense
+      fallback={
+        <div className="flex min-h-screen flex-col items-center justify-center px-4">
+          <div className="text-muted-foreground">Loading...</div>
+        </div>
+      }
+    >
+      <OtpLoginPageContent />
+    </React.Suspense>
   );
 }

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { validationConfig } from '../config.ts';
+import { validationConfig } from '../config';
 
 // Schema for the analyze request payload
 export const AnalyzeRequestSchema = z.object({
@@ -196,13 +196,15 @@ export const AnswerEvaluationSchema = z.object({
   missedSignals: z.array(z.string().min(1).max(200)).max(8),
 
   // Actionable suggestions
-  improvements: z.array(
-    z.object({
-      area: z.string().min(1).max(120),
-      suggestion: z.string().min(1).max(400),
-      priority: z.enum(['high', 'medium', 'low']),
-    }),
-  ).max(5),
+  improvements: z
+    .array(
+      z.object({
+        area: z.string().min(1).max(120),
+        suggestion: z.string().min(1).max(400),
+        priority: z.enum(['high', 'medium', 'low']),
+      }),
+    )
+    .max(5),
 
   // Metadata
   meta: z.object({
