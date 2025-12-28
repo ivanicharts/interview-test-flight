@@ -167,16 +167,15 @@ export async function submitAnswerAction({
       });
     }
 
-    // Trigger evaluation asynchronously
-    // Note: We don't await this - evaluation happens in background
-    // UI will show loading state and update via revalidation
-    evaluateAnswerAction({
+    // Trigger evaluation and wait for it to complete
+    // This ensures evaluation is displayed immediately when page revalidates
+    await evaluateAnswerAction({
       answerId: answer.id,
       questionId,
       answerText,
     }).catch((err) => {
       console.error('Background evaluation failed:', err);
-      // Silent failure - evaluation can be manually retried if needed
+      // Silent failure - answer is still saved, evaluation can be retried
     });
 
     const { data: allAnswers } = await getInterviewAnswersBySessionId(sessionId);

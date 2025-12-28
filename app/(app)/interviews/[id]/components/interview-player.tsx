@@ -188,6 +188,7 @@ export function InterviewPlayer({ plan, sessionId, questionsWithAnswers }: Inter
           {/* Answer input */}
           <div className="rounded-lg border border-border/60 bg-card p-6">
             <AnswerInput
+              key={currentQuestionData.id}
               sessionId={sessionId}
               questionId={currentQuestionData.id}
               initialAnswer={currentQuestionData.answer?.answer_text}
