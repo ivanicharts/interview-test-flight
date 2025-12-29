@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getUser } from '@/lib/supabase/queries';
+import { getUser, getDocuments } from '@/lib/supabase/queries';
 import { createDocument, deleteDocument } from '@/lib/supabase/mutations';
 import { DocumentType } from '@/lib/types';
 
@@ -49,6 +49,25 @@ export async function createDocumentAction({
   revalidatePath(`/documents/${data.id}`);
 
   return { data: { id: data.id } };
+}
+
+export async function getDocumentsAction(kind?: 'cv' | 'jd') {
+  // Check auth
+  const { user, error: userErr } = await getUser();
+  if (userErr || !user) {
+    return { data: [], error: 'Unauthorized' };
+  }
+
+  const result = await getDocuments({ maxContentLength: 200 });
+
+  if (result.error) {
+    return { data: [], error: result.error.message };
+  }
+
+  const documents = result.data || [];
+  const filtered = kind ? documents.filter((d) => d.kind === kind) : documents;
+
+  return { data: filtered, error: null };
 }
 
 export async function deleteDocumentAction(id: string) {

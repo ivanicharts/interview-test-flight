@@ -3,7 +3,11 @@ import { FileText, BarChart3, MessageSquare } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
-export function EmptyDashboardState() {
+interface EmptyDashboardStateProps {
+  onStartFlow?: () => void;
+}
+
+export function EmptyDashboardState({ onStartFlow }: EmptyDashboardStateProps) {
   return (
     <Card className="p-8">
       <div className="mx-auto max-w-md text-center space-y-6">
@@ -51,12 +55,20 @@ export function EmptyDashboardState() {
         </div>
 
         <div className="flex gap-2 justify-center pt-2">
-          <Button asChild>
-            <Link href="/documents/new">Upload Documents</Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link href="/analysis/new">Create Analysis</Link>
-          </Button>
+          {onStartFlow ? (
+            <Button onClick={onStartFlow} size="lg">
+              Start Interview Prep Flow
+            </Button>
+          ) : (
+            <>
+              <Button asChild>
+                <Link href="/documents/new">Upload Documents</Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href="/analysis/new">Create Analysis</Link>
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </Card>
