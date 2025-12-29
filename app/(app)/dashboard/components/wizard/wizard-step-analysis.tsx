@@ -1,10 +1,13 @@
 'use client';
 
 import { useEffect, useTransition } from 'react';
-import { Loader2, CheckCircle2 } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
+
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { createAnalysisAction } from '@/app/(app)/analysis/actions';
+
 import type { WizardState } from './start-flow-wizard';
+import { AnalysisLoadingAnimation } from './animations/analysis-generation-animation';
 
 interface WizardStepAnalysisProps {
   state: WizardState;
@@ -43,16 +46,18 @@ export function WizardStepAnalysis({ state, onNext }: WizardStepAnalysisProps) {
   return (
     <div className="space-y-6 text-center">
       <div>
-        <h3 className="font-semibold text-lg">Analyzing your match...</h3>
-        <p className="text-sm text-muted-foreground mt-2">
+        <h3 className="text-lg font-semibold">Analyzing your match...</h3>
+        <p className="text-muted-foreground mt-2 text-sm">
           Comparing &quot;{state.cvTitle}&quot; with &quot;{state.jdTitle}&quot;
         </p>
       </div>
 
       {isPending && (
-        <div className="flex flex-col items-center gap-4 py-8">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">
+        <div className="flex flex-col items-center gap-6 py-8">
+          {/* Animated Document Comparison Visualization */}
+          <AnalysisLoadingAnimation />
+
+          <p className="text-muted-foreground animate-pulse text-sm">
             AI is analyzing your CV against job requirements...
           </p>
         </div>
@@ -61,9 +66,7 @@ export function WizardStepAnalysis({ state, onNext }: WizardStepAnalysisProps) {
       {state.analysisId && !isPending && (
         <Alert>
           <CheckCircle2 className="h-4 w-4" />
-          <AlertDescription>
-            Analysis complete! Generating interview questions...
-          </AlertDescription>
+          <AlertDescription>Analysis complete! Generating interview questions...</AlertDescription>
         </Alert>
       )}
     </div>

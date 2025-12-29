@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useTransition } from 'react';
-import { Loader2 } from 'lucide-react';
 import { createInterviewAction } from '@/app/(app)/interviews/actions';
+
 import type { WizardState } from './start-flow-wizard';
+import { InterviewGenerationAnimation } from './animations/interview-generation-animation';
 
 interface WizardStepInterviewProps {
   state: WizardState;
@@ -42,16 +43,18 @@ export function WizardStepInterview({ state, onNext }: WizardStepInterviewProps)
   return (
     <div className="space-y-6 text-center">
       <div>
-        <h3 className="font-semibold text-lg">Generating interview questions...</h3>
-        <p className="text-sm text-muted-foreground mt-2">
+        <h3 className="text-lg font-semibold">Generating interview questions...</h3>
+        <p className="text-muted-foreground mt-2 text-sm">
           Creating personalized questions based on your analysis
         </p>
       </div>
 
       {isPending && (
-        <div className="flex flex-col items-center gap-4 py-8">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">
+        <div className="flex flex-col items-center gap-6 py-8">
+          {/* Animated Question Generation Visualization */}
+          <InterviewGenerationAnimation />
+
+          <p className="text-muted-foreground animate-pulse text-sm">
             AI is generating interview questions...
           </p>
         </div>
