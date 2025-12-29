@@ -1,7 +1,10 @@
 'use client';
 
-import { useState } from 'react';
 import { AlertCircle } from 'lucide-react';
+import { useState } from 'react';
+
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import {
   Sheet,
   SheetContent,
@@ -10,14 +13,13 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { WizardStepIndicator } from './wizard-step-indicator';
-import { WizardStepCV } from './wizard-step-cv';
-import { WizardStepJD } from './wizard-step-jd';
-import { WizardStepAnalysis } from './wizard-step-analysis';
-import { WizardStepInterview } from './wizard-step-interview';
+
 import { WizardCompletion } from './wizard-completion';
+import { WizardStepAnalysis } from './wizard-step-analysis';
+import { WizardStepCV } from './wizard-step-cv';
+import { WizardStepIndicator } from './wizard-step-indicator';
+import { WizardStepInterview } from './wizard-step-interview';
+import { WizardStepJD } from './wizard-step-jd';
 
 export type WizardStep = 'cv' | 'jd' | 'analysis' | 'interview' | 'complete';
 
