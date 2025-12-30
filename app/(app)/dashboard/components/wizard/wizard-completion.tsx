@@ -1,8 +1,11 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { CheckCircle2, Check } from 'lucide-react';
+import { Check, CheckCircle2 } from 'lucide-react';
+import Link from 'next/link';
+
 import { Button } from '@/components/ui/button';
+
+import { WizardStepContainer } from './components/wizard-step-container';
 import { useWizardStore } from './store/wizard-store';
 
 interface WizardCompletionProps {
@@ -10,32 +13,40 @@ interface WizardCompletionProps {
 }
 
 export function WizardCompletion({ onClose }: WizardCompletionProps) {
-  const router = useRouter();
   const interviewId = useWizardStore((state) => state.interviewId);
   const questionCount = useWizardStore((state) => state.questionCount);
   const cvTitle = useWizardStore((state) => state.cvTitle);
   const jdTitle = useWizardStore((state) => state.jdTitle);
-
-  const handleStartInterview = () => {
-    router.push(`/interviews/${interviewId}`);
-    onClose();
-  };
+  const analysisId = useWizardStore((state) => state.analysisId);
 
   return (
-    <div className="space-y-6 text-center">
+    <WizardStepContainer
+      className="space-y-6 text-center mt-10"
+      footer={
+        <>
+          <Button asChild variant="secondary">
+            <Link target="_blank" href={`/analysis/${analysisId}`}>
+              Open Analysis Report
+            </Link>
+          </Button>
+          <Button asChild>
+            <Link href={`/interviews/${interviewId}`}>Start Interview</Link>
+          </Button>
+        </>
+      }
+    >
       <div className="rounded-full bg-green-500/10 p-4 mx-auto w-fit">
         <CheckCircle2 className="h-12 w-12 text-green-600" />
       </div>
 
       <div>
         <h3 className="text-xl font-semibold">All Set!</h3>
-        <p className="text-muted-foreground mt-2">
-          Your interview prep is ready.{' '}
-          {questionCount ? `${questionCount} questions generated.` : ''}
+        <p className="text-muted-foreground">
+          Your interview prep is ready. {questionCount ? `${questionCount} questions generated.` : ''}
         </p>
       </div>
 
-      <div className="space-y-2 text-sm text-left bg-muted/20 p-4 rounded-lg">
+      <div className="space-y-2 text-sm text-left bg-muted/30 p-4 rounded-lg">
         <div className="flex items-center gap-2">
           <Check className="h-4 w-4 text-green-600" />
           <span>CV: {cvTitle}</span>
@@ -53,15 +64,6 @@ export function WizardCompletion({ onClose }: WizardCompletionProps) {
           <span>Interview questions ready</span>
         </div>
       </div>
-
-      <div className="flex flex-col gap-2">
-        <Button onClick={handleStartInterview} size="lg">
-          Start Interview
-        </Button>
-        <Button variant="outline" onClick={onClose}>
-          Return to Dashboard
-        </Button>
-      </div>
-    </div>
+    </WizardStepContainer>
   );
 }

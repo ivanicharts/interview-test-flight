@@ -1,24 +1,22 @@
 'use client';
 
-import { useEffect, useTransition } from 'react';
 import { createInterviewAction } from '@/app/(app)/interviews/actions';
-import { useWizardStore } from './store/wizard-store';
+import Link from 'next/link';
+import { useTransition } from 'react';
+import { useShallow } from 'zustand/react/shallow';
+
+import { Button } from '@/components/ui/button';
+
 import { InterviewGenerationAnimation } from './animations/interview-generation-animation';
+import { WizardStepContainer } from './components/wizard-step-container';
+import { useWizardStore } from './store/wizard-store';
 
 export function WizardStepInterview() {
-  const analysisId = useWizardStore((state) => state.analysisId);
-  const interviewId = useWizardStore((state) => state.interviewId);
-  const setInterviewData = useWizardStore((state) => state.setInterviewData);
-  const setError = useWizardStore((state) => state.setError);
-
   const [isPending, startTransition] = useTransition();
 
-  useEffect(() => {
-    if (analysisId && !interviewId && !isPending) {
-      runInterviewGeneration();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [analysisId, interviewId]);
+  const [analysisId, interviewId, setInterviewData, setError] = useWizardStore(
+    useShallow((state) => [state.analysisId, state.interviewId, state.setInterviewData, state.setError]),
+  );
 
   const runInterviewGeneration = () => {
     startTransition(async () => {
@@ -35,16 +33,43 @@ export function WizardStepInterview() {
   };
 
   return (
-    <div className="space-y-6 text-center">
-      <div>
-        <h3 className="text-lg font-semibold">Generating interview questions...</h3>
-        <p className="text-muted-foreground mt-2 text-sm">
-          Creating personalized questions based on your analysis
-        </p>
-      </div>
+    <WizardStepContainer
+      className="space-y-6 text-center mt-10"
+      footer={
+        <>
+          <Button asChild variant="secondary">
+            <Link target="_blank" href={`/analysis/${analysisId}`}>
+              Open Analysis Report
+            </Link>
+          </Button>
+          {interviewId ? (
+            <Button loading={isPending}>Start Interview</Button>
+          ) : (
+            <Button onClick={runInterviewGeneration} loading={isPending}>
+              Generate Questions
+            </Button>
+          )}
+        </>
+      }
+    >
+      {!isPending && !interviewId && (
+        <div>
+          <h3 className="text-lg font-semibold">Ready to generate your interview questions?</h3>
+          <p className="text-muted-foreground text-sm">
+            We will create personalized questions based on your analysis
+          </p>
+        </div>
+      )}
 
       {isPending && (
         <div className="flex flex-col items-center gap-6 py-8">
+          <div>
+            <h3 className="text-lg font-semibold">Generating interview questions...</h3>
+            <p className="text-muted-foreground text-sm">
+              Creating personalized questions based on your analysis
+            </p>
+          </div>
+
           {/* Animated Question Generation Visualization */}
           <InterviewGenerationAnimation />
 
@@ -53,6 +78,6 @@ export function WizardStepInterview() {
           </p>
         </div>
       )}
-    </div>
+    </WizardStepContainer>
   );
 }
