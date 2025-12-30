@@ -1,20 +1,10 @@
 'use client';
 
-import { AlertCircle } from 'lucide-react';
 import { useEffect } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
 import { ErrorAlert } from '@/components/ui/error-alert';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 
 import { useWizardStore } from './store/wizard-store';
 import { WizardCompletion } from './wizard-completion';
@@ -33,11 +23,9 @@ interface StartFlowWizardProps {
 }
 
 export function StartFlowWizard({ open, onOpenChange }: StartFlowWizardProps) {
-  const [currentStep, error, isLoading, goBack, reset] = useWizardStore(
-    useShallow((state) => [state.currentStep, state.error, state.isLoading, state.goBack, state.reset]),
+  const [currentStep, error, reset] = useWizardStore(
+    useShallow((state) => [state.currentStep, state.error, state.reset]),
   );
-
-  const canGoBack = () => currentStep === 1;
 
   const handleClose = (shouldClose: boolean) => {
     if (shouldClose) {
@@ -61,27 +49,16 @@ export function StartFlowWizard({ open, onOpenChange }: StartFlowWizardProps) {
           <SheetDescription>Complete the steps below to prepare for your interview</SheetDescription>
         </SheetHeader>
 
-        <div className="px-4">
+        <div className="px-4 space-y-4">
           <WizardStepIndicator currentStep={currentStep} />
-
-          <div className="flex-1 py-6">
-            {currentStep === 0 && <WizardStepCV />}
-            {currentStep === 1 && <WizardStepJD />}
-            {currentStep === 2 && <WizardStepAnalysis />}
-            {currentStep === 3 && <WizardStepInterview />}
-            {currentStep === 4 && <WizardCompletion onClose={() => handleClose(false)} />}
-          </div>
-
           {error && <ErrorAlert message={error} />}
         </div>
 
-        <SheetFooter className="flex gap-2">
-          {canGoBack() && (
-            <Button variant="outline" onClick={goBack} disabled={isLoading}>
-              Back
-            </Button>
-          )}
-        </SheetFooter>
+        {currentStep === 0 && <WizardStepCV />}
+        {currentStep === 1 && <WizardStepJD />}
+        {currentStep === 2 && <WizardStepAnalysis />}
+        {currentStep === 3 && <WizardStepInterview />}
+        {currentStep === 4 && <WizardCompletion onClose={() => handleClose(false)} />}
       </SheetContent>
     </Sheet>
   );
