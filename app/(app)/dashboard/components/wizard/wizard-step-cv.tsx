@@ -1,11 +1,14 @@
 'use client';
 
-import { createDocumentAction, getDocumentsAction } from '@/app/(app)/documents/actions';
+import { DocumentForm } from '@/app/(app)/documents/components/document-submit-form-ui';
+// import { DocumentForm } from '@/app/(app)/documents/components/document-submit-form';
+import { useSubmitDocumentForm } from '@/app/(app)/documents/components/useSubmitDocumentForm';
+import { useUserDocuments } from '@/app/(app)/documents/hooks/use-user-document';
 import { useEffect, useState, useTransition } from 'react';
 
-import { cn } from '@/lib/utils';
-
+import { DocumentPicker } from '@/components/document-picker';
 import { Button } from '@/components/ui/button';
+import { ErrorAlert } from '@/components/ui/error-alert';
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -14,44 +17,38 @@ import { Textarea } from '@/components/ui/textarea';
 import { WizardStepContainer } from './components/wizard-step-container';
 import { useWizardStore } from './store/wizard-store';
 
-interface Document {
-  id: string;
-  title: string;
-  content: string;
-  kind: 'cv' | 'jd';
-}
+const DOCUMENT_TYPE = 'cv';
 
 export function WizardStepCV() {
   const setCVData = useWizardStore((state) => state.setCVData);
   const setError = useWizardStore((state) => state.setError);
+  // const [isPending, setIsPending] = useState(false);
 
   const [mode, setMode] = useState<'select' | 'create'>('select');
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+  // const [title, setTitle] = useState('');
+  // const [content, setContent] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
-  const [cvs, setCvs] = useState<Document[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // const [isPending, startTransition] = useTransition();
 
+  const { onSubmit, error, isPending, title, setTitle, content, setContent } = useSubmitDocumentForm({
+    documentType: DOCUMENT_TYPE,
+    onSuccess: (id: string, newTitle: string) => {
+      setCVData(id, newTitle);
+    },
+  });
+
+  const { data: cvData, isLoading } = useUserDocuments(DOCUMENT_TYPE);
+
+  const cvs = cvData?.documents || [];
+
+  // Auto-select first CV or switch to create mode
   useEffect(() => {
-    async function loadCvs() {
-      try {
-        const result = await getDocumentsAction('cv');
-        const cvDocs = result.data || [];
-        setCvs(cvDocs);
-        if (cvDocs.length > 0) {
-          setSelectedId(cvDocs[0].id);
-        } else {
-          setMode('create');
-        }
-      } catch (error) {
-        console.error('Failed to load CVs:', error);
-      } finally {
-        setIsLoading(false);
-      }
+    if (!isLoading && cvs.length > 0 && !selectedId) {
+      setSelectedId(cvs[0].id);
+    } else if (!isLoading && cvs.length === 0) {
+      setMode('create');
     }
-    loadCvs();
-  }, []);
+  }, [cvs, isLoading, selectedId]);
 
   const handleSelectExisting = () => {
     if (!selectedId) return;
@@ -64,19 +61,19 @@ export function WizardStepCV() {
   const handleCreateNew = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    startTransition(async () => {
-      const result = await createDocumentAction({
-        documentType: 'cv',
-        title: title.trim(),
-        content: content.trim(),
-      });
+    // startTransition(async () => {
+    //   const result = await createDocumentAction({
+    //     documentType: 'cv',
+    //     title: title.trim(),
+    //     content: content.trim(),
+    //   });
 
-      if (result.error) {
-        setError(result.error);
-      } else if (result.data) {
-        setCVData(result.data.id, title.trim());
-      }
-    });
+    //   if (result.error) {
+    //     setError(result.error);
+    //   } else if (result.data) {
+    //     setCVData(result.data.id, title.trim());
+    //   }
+    // });
   };
 
   if (isLoading) {
@@ -93,7 +90,7 @@ export function WizardStepCV() {
         Continue with Selected CV
       </Button>
     ) : (
-      <Button type="submit" loading={isPending} disabled={content.length < 200} className="w-full">
+      <Button type="submit" form="cv-form" loading={isPending} className="w-full">
         Create & Continue
       </Button>
     );
@@ -106,6 +103,8 @@ export function WizardStepCV() {
           <TabsTrigger value="create">Create New</TabsTrigger>
         </TabsList>
 
+        {error && <ErrorAlert message={error} />}
+
         <TabsContent value="select" className="space-y-4 mt-6">
           {cvs.length === 0 ? (
             <div className="text-center py-8">
@@ -114,30 +113,33 @@ export function WizardStepCV() {
               </p>
             </div>
           ) : (
-            <>
-              <div className="space-y-2 max-h-96 overflow-y-auto">
-                {cvs.map((cv) => (
-                  <div
-                    key={cv.id}
-                    className={cn(
-                      'border rounded-lg p-4 cursor-pointer transition hover:border-primary/50',
-                      selectedId === cv.id && 'border-primary bg-primary/5',
-                    )}
-                    onClick={() => setSelectedId(cv.id)}
-                  >
-                    <div className="font-medium">{cv.title}</div>
-                    <div className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                      {cv.content.substring(0, 150)}...
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </>
+            <DocumentPicker title="Your CVs" docs={cvs} selectedId={selectedId} onSelect={setSelectedId} />
           )}
         </TabsContent>
 
         <TabsContent value="create" className="space-y-4 mt-6">
-          <form onSubmit={handleCreateNew} className="space-y-4">
+          <DocumentForm
+            formId="cv-form"
+            documentType={DOCUMENT_TYPE}
+            onSubmit={onSubmit}
+            title={title}
+            onTitleChange={setTitle}
+            content={content}
+            onContentChange={setContent}
+          />
+          {/* <DocumentForm
+            disableCta
+            formId="cv-form"
+            initialDocumentType="cv"
+            onSubmit={() => setIsPending(true)}
+            onError={() => {
+              setIsPending(false);
+            }}
+            onSuccess={(id, title) => {
+              setCVData(id, title);
+            }}
+          /> */}
+          {/* <form onSubmit={handleCreateNew} className="space-y-4">
             <Field>
               <FieldLabel>CV Title</FieldLabel>
               <Input
@@ -160,7 +162,7 @@ export function WizardStepCV() {
               />
               <FieldDescription>{content.length} / 200 characters minimum</FieldDescription>
             </Field>
-          </form>
+          </form> */}
         </TabsContent>
       </Tabs>
     </WizardStepContainer>

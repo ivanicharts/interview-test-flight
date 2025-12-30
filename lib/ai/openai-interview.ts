@@ -1,6 +1,10 @@
 import OpenAI from 'openai';
 import { zodTextFormat } from 'openai/helpers/zod';
-import { InterviewPlanSchema, type InterviewPlan, type AnalysisResult } from './schemas';
+
+import * as config from '@/lib/config';
+import { clip } from '@/lib/utils';
+
+import { type AnalysisResult, type InterviewPlan, InterviewPlanSchema } from './schemas';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -35,15 +39,6 @@ OUTPUT RULES:
 - Provide clear, actionable rubrics for evaluators
 `.trim();
 
-function clip(text: string, maxChars: number) {
-  const normalized = text
-    .replace(/\r\n/g, '\n')
-    .replace(/[ \t]+/g, ' ')
-    .trim();
-  if (normalized.length <= maxChars) return normalized;
-  return normalized.slice(0, maxChars) + '\n\n[TRUNCATED]';
-}
-
 export async function generateInterviewPlan(args: {
   jdText: string;
   cvText: string;
@@ -52,8 +47,8 @@ export async function generateInterviewPlan(args: {
   model: string;
   safetyIdentifier?: string;
 }): Promise<InterviewPlan> {
-  const jd = clip(args.jdText, 6000);
-  const cv = clip(args.cvText, 6000);
+  const jd = clip(args.jdText, config.MAX_DOCUMENT_CONTENT_LENGTH);
+  const cv = clip(args.cvText, config.MAX_DOCUMENT_CONTENT_LENGTH);
 
   // Extract key analysis data for the prompt
   const highPriorityGaps = args.analysisResult.gaps.filter((g) => g.priority === 'high');

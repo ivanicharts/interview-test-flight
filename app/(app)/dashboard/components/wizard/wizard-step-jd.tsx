@@ -1,26 +1,17 @@
 'use client';
 
-import { createDocumentAction, getDocumentsAction } from '@/app/(app)/documents/actions';
+import { useUserDocuments } from '@/app/(app)/documents/hooks/use-user-document';
 import { useEffect, useState, useTransition } from 'react';
 
-import { cn } from '@/lib/utils';
-
+import { DocumentPicker } from '@/components/document-picker';
 import { Button } from '@/components/ui/button';
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { SheetFooter } from '@/components/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 
 import { WizardStepContainer } from './components/wizard-step-container';
 import { useWizardStore } from './store/wizard-store';
-
-interface Document {
-  id: string;
-  title: string;
-  content: string;
-  kind: 'cv' | 'jd';
-}
 
 export function WizardStepJD() {
   const setJDData = useWizardStore((state) => state.setJDData);
@@ -32,28 +23,19 @@ export function WizardStepJD() {
   const [content, setContent] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const [jds, setJds] = useState<Document[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
 
+  const { data: jdData, isLoading } = useUserDocuments('jd');
+
+  const jds = jdData?.documents || [];
+
+  // Auto-select first JD or switch to create mode
   useEffect(() => {
-    async function loadJds() {
-      try {
-        const result = await getDocumentsAction('jd');
-        const jdDocs = result.data || [];
-        setJds(jdDocs);
-        if (jdDocs.length > 0) {
-          setSelectedId(jdDocs[0].id);
-        } else {
-          setMode('create');
-        }
-      } catch (error) {
-        console.error('Failed to load JDs:', error);
-      } finally {
-        setIsLoading(false);
-      }
+    if (!isLoading && jds.length > 0 && !selectedId) {
+      setSelectedId(jds[0].id);
+    } else if (!isLoading && jds.length === 0) {
+      setMode('create');
     }
-    loadJds();
-  }, []);
+  }, [jds, isLoading, selectedId]);
 
   const handleSelectExisting = () => {
     if (!selectedId) return;
@@ -66,19 +48,19 @@ export function WizardStepJD() {
   const handleCreateNew = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    startTransition(async () => {
-      const result = await createDocumentAction({
-        documentType: 'jd',
-        title: title.trim(),
-        content: content.trim(),
-      });
+    // startTransition(async () => {
+    //   const result = await createDocumentAction({
+    //     documentType: 'jd',
+    //     title: title.trim(),
+    //     content: content.trim(),
+    //   });
 
-      if (result.error) {
-        setError(result.error);
-      } else if (result.data) {
-        setJDData(result.data.id, title.trim());
-      }
-    });
+    //   if (result.error) {
+    //     setError(result.error);
+    //   } else if (result.data) {
+    //     setJDData(result.data.id, title.trim());
+    //   }
+    // });
   };
 
   if (isLoading) {
@@ -117,7 +99,7 @@ export function WizardStepJD() {
           <TabsTrigger value="create">Create New</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="select" className="space-y-4 mt-6">
+        <TabsContent value="select" className="space-y-4 mt-4">
           {jds.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-sm text-muted-foreground">
@@ -125,25 +107,7 @@ export function WizardStepJD() {
               </p>
             </div>
           ) : (
-            <>
-              <div className="space-y-2">
-                {jds.map((jd) => (
-                  <div
-                    key={jd.id}
-                    className={cn(
-                      'border rounded-lg p-4 cursor-pointer transition hover:border-primary/50',
-                      selectedId === jd.id && 'border-primary bg-primary/5',
-                    )}
-                    onClick={() => setSelectedId(jd.id)}
-                  >
-                    <div className="font-medium">{jd.title}</div>
-                    <div className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                      {jd.content.substring(0, 150)}...
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </>
+            <DocumentPicker docs={jds} selectedId={selectedId} onSelect={setSelectedId} />
           )}
         </TabsContent>
 

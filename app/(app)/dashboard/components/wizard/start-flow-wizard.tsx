@@ -44,7 +44,7 @@ export function StartFlowWizard({ open, onOpenChange }: StartFlowWizardProps) {
   return (
     <Sheet open={open} onOpenChange={handleClose}>
       <SheetContent side="right" className="flex w-full flex-col overflow-y-auto sm:max-w-2xl">
-        <SheetHeader>
+        <SheetHeader className="gap-0 pb-0">
           <SheetTitle>Interview Prep Flow</SheetTitle>
           <SheetDescription>Complete the steps below to prepare for your interview</SheetDescription>
         </SheetHeader>

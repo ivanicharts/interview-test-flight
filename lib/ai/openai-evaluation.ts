@@ -1,6 +1,10 @@
 import OpenAI from 'openai';
 import { zodTextFormat } from 'openai/helpers/zod';
-import { AnswerEvaluationSchema, type AnswerEvaluation, type QuestionRubric } from './schemas';
+
+import * as config from '@/lib/config';
+import { clip } from '@/lib/utils';
+
+import { type AnswerEvaluation, AnswerEvaluationSchema, type QuestionRubric } from './schemas';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -35,15 +39,6 @@ OUTPUT RULES:
 - Include detected signals with evidence (quotes from answer)
 - Prioritize improvements (focus on high-impact changes)
 `.trim();
-
-function clip(text: string, maxChars: number) {
-  const normalized = text
-    .replace(/\r\n/g, '\n')
-    .replace(/[ \t]+/g, ' ')
-    .trim();
-  if (normalized.length <= maxChars) return normalized;
-  return normalized.slice(0, maxChars) + '\n\n[TRUNCATED]';
-}
 
 export async function evaluateInterviewAnswer(args: {
   answerText: string;
@@ -80,9 +75,11 @@ export async function evaluateInterviewAnswer(args: {
     };
   }
 
-  const answer = clip(args.answerText, 4000);
-  const question = clip(args.questionText, 800);
-  const context = args.questionContext ? clip(args.questionContext, 400) : null;
+  const answer = clip(args.answerText, config.MAX_ANSWER_CONTENT_LENGTH);
+  const question = clip(args.questionText, config.MAX_QUESTION_CONTENT_LENGTH);
+  const context = args.questionContext
+    ? clip(args.questionContext, config.MAX_QUESTION_CONTEXT_LENGTH)
+    : null;
 
   const response = await openai.responses.parse({
     model: args.model,

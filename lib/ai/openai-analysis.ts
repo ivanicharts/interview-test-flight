@@ -1,7 +1,11 @@
+import crypto from 'node:crypto';
 import OpenAI from 'openai';
 import { zodTextFormat } from 'openai/helpers/zod';
-import crypto from 'node:crypto';
-import { AnalysisResultSchema, type AnalysisResult } from './schemas';
+
+import { MAX_DOCUMENT_CONTENT_LENGTH } from '@/lib/config';
+import { clip } from '@/lib/utils';
+
+import { type AnalysisResult, AnalysisResultSchema } from './schemas';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -19,15 +23,6 @@ OUTPUT RULES:
 - Prefer actionable rewrite suggestions (impact + metrics + scope).
 `.trim();
 
-function clip(text: string, maxChars: number) {
-  const normalized = text
-    .replace(/\r\n/g, '\n')
-    .replace(/[ \t]+/g, ' ')
-    .trim();
-  if (normalized.length <= maxChars) return normalized;
-  return normalized.slice(0, maxChars) + '\n\n[TRUNCATED]';
-}
-
 export function hashedSafetyIdentifier(userId: string) {
   // Avoid sending PII; hash is enough for abuse monitoring buckets.
   return crypto.createHash('sha256').update(userId).digest('hex');
@@ -39,8 +34,8 @@ export async function analyzeJDAndCV(args: {
   model: string;
   safetyIdentifier?: string;
 }): Promise<AnalysisResult> {
-  const jd = clip(args.jdText, 14000);
-  const cv = clip(args.cvText, 14000);
+  const jd = clip(args.jdText, MAX_DOCUMENT_CONTENT_LENGTH);
+  const cv = clip(args.cvText, MAX_DOCUMENT_CONTENT_LENGTH);
 
   // Parsed object already validated by the SDK + schema, but keep a final parse as a guard.
 

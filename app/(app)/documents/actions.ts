@@ -1,8 +1,9 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getUser, getDocuments } from '@/lib/supabase/queries';
+
 import { createDocument, deleteDocument } from '@/lib/supabase/mutations';
+import { getDocuments, getUser } from '@/lib/supabase/queries';
 import { DocumentType } from '@/lib/types';
 
 type CreateDocumentInput = {
@@ -25,6 +26,10 @@ export async function createDocumentAction({
 
   if (!content || content.trim().length < 50) {
     return { error: 'Content too short (min 50 chars)' };
+  }
+
+  if (content.trim().length > 10000) {
+    return { error: 'Content too long (max 10000 chars)' };
   }
 
   // Check auth
