@@ -1,8 +1,9 @@
+import { BarChart3, FileText, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
-import { FileText, BarChart3, MessageSquare } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { ContentCard } from '@/components/ui/content-card';
 
 interface StatsOverviewProps {
   stats: {
@@ -12,76 +13,68 @@ interface StatsOverviewProps {
   };
 }
 
+const StatCardContent = ({
+  total,
+  meta,
+  href,
+}: {
+  total: React.ReactNode;
+  meta: React.ReactNode;
+  href: string;
+}) => {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center gap-3">
+        <div className="text-2xl font-bold">{total}</div>
+        <p className="text-muted-foreground mt-1 text-xs">{meta}</p>
+      </div>
+      <Button asChild variant="link" size="inline">
+        <Link href={href}>View All</Link>
+      </Button>
+    </div>
+  );
+};
+
 export function StatsOverview({ stats }: StatsOverviewProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className="grid gap-2 md:gap-4 md:grid-cols-3">
       {/* Documents Card */}
-      <Card className="gap-2">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">Documents</CardTitle>
-          <FileText className="text-muted-foreground h-4 w-4" />
-        </CardHeader>
-        <CardContent className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="text-2xl font-bold">{stats.documents.total}</div>
-            <p className="text-muted-foreground mt-1 text-xs">
-              {stats.documents.jdCount} JDs • {stats.documents.cvCount} CVs
-            </p>
-          </div>
-          <Button asChild variant="link" size="inline">
-            <Link href="/documents">View All</Link>
-          </Button>
-        </CardContent>
-      </Card>
+      <ContentCard title="Documents" label={<FileText className="text-muted-foreground h-4 w-4" />}>
+        <StatCardContent
+          total={stats.documents.total}
+          meta={`${stats.documents.jdCount} JDs • ${stats.documents.cvCount} CVs`}
+          href="/documents"
+        />
+      </ContentCard>
 
       {/* Analyses Card */}
-      <Card className="gap-2">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">Analyses</CardTitle>
-          <BarChart3 className="text-muted-foreground h-4 w-4" />
-        </CardHeader>
-        <CardContent className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="text-2xl font-bold">{stats.analyses.total}</div>
-            {stats.analyses.avgScore !== null ? (
-              <p className="text-muted-foreground mt-1 text-xs">
+      <ContentCard title="Analyses" label={<BarChart3 className="text-muted-foreground h-4 w-4" />}>
+        <StatCardContent
+          total={stats.analyses.total}
+          meta={
+            stats.analyses.avgScore !== null ? (
+              <span className="text-muted-foreground mt-1 text-xs">
                 Avg Score:{' '}
                 <Badge variant="secondary" className="ml-1">
                   {stats.analyses.avgScore}/100
                 </Badge>
-              </p>
+              </span>
             ) : (
-              <p className="text-muted-foreground mt-1 text-xs">No analyses yet</p>
-            )}
-          </div>
+              <span className="text-muted-foreground mt-1 text-xs">No analyses yet</span>
+            )
+          }
+          href="/analysis"
+        />
+      </ContentCard>
 
-          <Button asChild variant="link" size="inline">
-            <Link href="/analysis">View All</Link>
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* Interviews Card */}
-      <Card className="gap-2">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">Interviews</CardTitle>
-          <MessageSquare className="text-muted-foreground h-4 w-4" />
-        </CardHeader>
-        <CardContent className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="text-2xl font-bold">{stats.interviews.total}</div>
-            <p className="text-muted-foreground mt-1 text-xs">
-              {stats.interviews.inProgress > 0
-                ? `${stats.interviews.inProgress} in progress`
-                : 'All completed'}
-            </p>
-          </div>
-
-          <Button asChild variant="link" size="inline">
-            <Link href="/interviews">View All</Link>
-          </Button>
-        </CardContent>
-      </Card>
+      {/* Documents Card */}
+      <ContentCard title="Interviews" label={<MessageSquare className="text-muted-foreground h-4 w-4" />}>
+        <StatCardContent
+          total={stats.interviews.total}
+          meta={`${stats.interviews.inProgress} in progress`}
+          href="/interviews"
+        />
+      </ContentCard>
     </div>
   );
 }

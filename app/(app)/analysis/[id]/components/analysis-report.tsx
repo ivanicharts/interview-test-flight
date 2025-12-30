@@ -1,7 +1,9 @@
 import type { AnalysisResult } from '@/lib/ai/schemas';
+import { cn } from '@/lib/utils';
+
+import { ContentCard } from '@/components/ui/content-card';
 import { Pill } from '@/components/ui/pill';
 import { Progress } from '@/components/ui/progress';
-import { ContentSection } from '@/components/ui/content-section';
 
 import { IMPORTANCE_TONE_MAP, MATCH_TONE_MAP, PRIORITY_TONE_MAP, getScoreTone } from '../utils';
 import { ReportCard } from './report-card';
@@ -15,9 +17,13 @@ export function AnalysisReport({ result }: AnalysisReportProps) {
   const scoreTone = getScoreTone(result.overallScore);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 mt-2">
       {/* Score */}
-      <ContentSection title="Match score" label={<Pill tone={scoreTone}>{result.overallScore}%</Pill>}>
+      <ContentCard
+        borderlessMobile
+        title="Match score"
+        label={<Pill tone={scoreTone}>{result.overallScore}%</Pill>}
+      >
         <Progress value={result.overallScore} max={100} tone={scoreTone} />
         {result.strengths?.length > 0 && (
           <div className="mt-4">
@@ -31,10 +37,11 @@ export function AnalysisReport({ result }: AnalysisReportProps) {
             </ul>
           </div>
         )}
-      </ContentSection>
+      </ContentCard>
 
       {/* Evidence mapping */}
-      <ContentSection
+      <ContentCard
+        borderlessMobile
         title="Evidence mapping"
         label={<Pill tone="neutral">{result.evidence.length} requirements</Pill>}
       >
@@ -79,9 +86,9 @@ export function AnalysisReport({ result }: AnalysisReportProps) {
                 <th className="py-2 pr-4">CV evidence</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-border/60  divide-y">
               {result.evidence.map((e, i) => (
-                <tr key={i} className="border-b align-top">
+                <tr key={i} className="align-top">
                   <td className="py-3 pr-4 font-medium">{e.requirement}</td>
                   <td className="py-3 pr-4">
                     <Pill tone={IMPORTANCE_TONE_MAP[e.importance]}>{e.importance}</Pill>
@@ -96,10 +103,14 @@ export function AnalysisReport({ result }: AnalysisReportProps) {
             </tbody>
           </table>
         </div>
-      </ContentSection>
+      </ContentCard>
 
       {/* Gaps */}
-      <ContentSection title="Gaps" label={<Pill tone="neutral">{result.gaps.length} items</Pill>}>
+      <ContentCard
+        borderlessMobile
+        title="Gaps"
+        label={<Pill tone="neutral">{result.gaps.length} items</Pill>}
+      >
         {result.gaps.map((g, i) => (
           <ReportCard
             key={i}
@@ -114,10 +125,10 @@ export function AnalysisReport({ result }: AnalysisReportProps) {
             </ul>
           </ReportCard>
         ))}
-      </ContentSection>
+      </ContentCard>
 
       {/* Rewrite suggestions */}
-      <ContentSection title="Rewrite suggestions">
+      <ContentCard title="Rewrite suggestions">
         {result.rewriteSuggestions.headline && (
           <ReportCard description="Suggested headline">
             <div className="font-medium">{result.rewriteSuggestions.headline}</div>
@@ -157,12 +168,12 @@ export function AnalysisReport({ result }: AnalysisReportProps) {
             </ReportCard>
           ))}
         </ReportCard>
-      </ContentSection>
+      </ContentCard>
 
       {/* Meta */}
-      <ContentSection>
+      <ContentCard>
         <ReportMeta meta={result.meta} />
-      </ContentSection>
+      </ContentCard>
     </div>
   );
 }

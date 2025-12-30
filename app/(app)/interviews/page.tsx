@@ -1,11 +1,12 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { formatDate } from '@/lib/utils';
-import { getUser, getInterviewSessions } from '@/lib/supabase/queries';
-import { PageSection } from '@/components/ui/page-section';
-import { Badge } from '@/components/ui/badge';
+
+import { getInterviewSessions, getUser } from '@/lib/supabase/queries';
+
 import { Button } from '@/components/ui/button';
-import { List, ListItem, ListItemContent } from '@/components/ui/list';
+import { PageSection } from '@/components/ui/page-section';
+
+import { InterviewsList } from './components/InterviewsList';
 
 export default async function InterviewsPage() {
   const { user } = await getUser();
@@ -15,6 +16,7 @@ export default async function InterviewsPage() {
   }
 
   const { data: sessions, error } = await getInterviewSessions();
+
   if (error) {
     throw new Error(error.message);
   }
@@ -40,47 +42,7 @@ export default async function InterviewsPage() {
           </Button>
         </div>
       ) : (
-        <List>
-          {sessions.map((session: any) => (
-            <ListItem key={session.id}>
-              <ListItemContent>
-                <div className="flex items-center gap-2">
-                  <Badge
-                    variant={
-                      session.status === 'completed'
-                        ? 'default'
-                        : session.status === 'in_progress'
-                          ? 'secondary'
-                          : 'outline'
-                    }
-                  >
-                    {session.status === 'completed'
-                      ? 'Completed'
-                      : session.status === 'in_progress'
-                        ? 'In Progress'
-                        : 'Pending'}
-                  </Badge>
-                  <Link
-                    href={`/interviews/${session.id}`}
-                    className="line-clamp-1 font-medium hover:underline"
-                  >
-                    {session.analysis?.jd_document?.title || 'Interview Session'}
-                  </Link>
-                </div>
-                <div className="text-muted-foreground mt-1 text-xs">
-                  {formatDate(session.created_at)}
-                  {session.mode && ` • ${session.mode}`}
-                  {session.completed_at && ` • Completed ${formatDate(session.completed_at)}`}
-                </div>
-              </ListItemContent>
-              <Button asChild variant="secondary" size="sm">
-                <Link href={`/interviews/${session.id}`}>
-                  {session.status === 'completed' ? 'Review' : 'Continue'}
-                </Link>
-              </Button>
-            </ListItem>
-          ))}
-        </List>
+        <InterviewsList interviewSessions={sessions} />
       )}
     </PageSection>
   );

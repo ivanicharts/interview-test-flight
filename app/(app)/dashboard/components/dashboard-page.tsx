@@ -1,36 +1,26 @@
 'use client';
 
 import { useState } from 'react';
+
+import { type InterviewSessionWithProgress } from '@/lib/supabase/queries';
+
 import { Button } from '@/components/ui/button';
 import { PageSection } from '@/components/ui/page-section';
-import { StatsOverview } from './stats-overview';
+
 import { ActiveSessionsSection } from './active-sessions-section';
-import { RecentAnalysesSection } from './recent-analyses-section';
 import { EmptyDashboardState } from './empty-dashboard-state';
+import { RecentAnalysesSection } from './recent-analyses-section';
+import { StatsOverview } from './stats-overview';
 import { StartFlowWizard } from './wizard/start-flow-wizard';
 
-interface DashboardClientProps {
+type Props = {
   hasAnyData: boolean;
   stats: {
     documents: { total: number; jdCount: number; cvCount: number };
     analyses: { total: number; avgScore: number | null };
     interviews: { total: number; inProgress: number };
   };
-  activeSessions: Array<{
-    id: string;
-    status: 'pending' | 'in_progress';
-    mode: string;
-    plan: any;
-    created_at: string;
-    analysis: Array<{
-      jd_document: Array<{ title: string }>;
-      cv_document: Array<{ title: string }>;
-    }>;
-    progress: {
-      total: number;
-      answered: number;
-    };
-  }>;
+  activeSessions: Array<InterviewSessionWithProgress>;
   recentAnalyses: Array<{
     id: string;
     match_score: number;
@@ -39,14 +29,9 @@ interface DashboardClientProps {
     jd_document: Array<{ title: string }>;
     cv_document: Array<{ title: string }>;
   }>;
-}
+};
 
-export function DashboardClient({
-  hasAnyData,
-  stats,
-  activeSessions,
-  recentAnalyses,
-}: DashboardClientProps) {
+export const DashboardPage = ({ hasAnyData, stats, activeSessions, recentAnalyses }: Props) => {
   const [wizardOpen, setWizardOpen] = useState(false);
 
   if (!hasAnyData) {
@@ -67,9 +52,7 @@ export function DashboardClient({
       <PageSection
         title="Dashboard"
         description="Your progress and activity across interview prep"
-        actions={
-          <Button onClick={() => setWizardOpen(true)}>Start New Flow</Button>
-        }
+        actions={<Button onClick={() => setWizardOpen(true)}>Start New Flow</Button>}
       >
         <div className="space-y-6">
           {/* Stats Overview - Always show if data exists */}
@@ -85,4 +68,4 @@ export function DashboardClient({
       <StartFlowWizard open={wizardOpen} onOpenChange={setWizardOpen} />
     </>
   );
-}
+};

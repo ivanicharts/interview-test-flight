@@ -1,15 +1,15 @@
 import { redirect } from 'next/navigation';
+
 import {
-  getUser,
-  getDashboardStats,
   getActiveInterviewSessions,
+  getDashboardStats,
   getRecentAnalyses,
+  getUser,
 } from '@/lib/supabase/queries';
-import { DashboardClient } from './components/dashboard-client';
 
-export const dynamic = 'force-dynamic';
+import { DashboardPage } from './components/dashboard-page';
 
-export default async function DashboardPage() {
+export default async function DashboardPageWrapper() {
   const { user } = await getUser();
   if (!user) redirect('/login');
 
@@ -28,7 +28,7 @@ export default async function DashboardPage() {
   const hasAnyData = stats.documents.total > 0 || stats.analyses.total > 0 || stats.interviews.total > 0;
 
   return (
-    <DashboardClient
+    <DashboardPage
       hasAnyData={hasAnyData}
       stats={stats}
       activeSessions={activeSessions}

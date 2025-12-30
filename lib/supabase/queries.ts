@@ -1,3 +1,5 @@
+import { QueryData } from '@supabase/supabase-js';
+
 import { supabaseServer } from '@/lib/supabase/server';
 
 export async function getAnalyses() {
@@ -17,6 +19,8 @@ export async function getAnalyses() {
     .order('created_at', { ascending: false })
     .limit(100);
 }
+
+export type Analysis = QueryData<ReturnType<typeof getAnalyses>>[number];
 
 export async function getAnalysisById(id: string) {
   const supabase = await supabaseServer();
@@ -87,7 +91,7 @@ export const getUser = async () => {
 
 // ==================== Interview Queries ====================
 
-export async function getInterviewSessions() {
+export async function getInterviewSessions(limit: number = 100) {
   const supabase = await supabaseServer();
   return supabase
     .from('interview_sessions')
@@ -96,19 +100,23 @@ export async function getInterviewSessions() {
       id,
       status,
       mode,
+      plan,
       created_at,
       started_at,
       completed_at,
       analysis:analysis_id(
         id,
+        match_score,
         jd_document:jd_document_id(title),
         cv_document:cv_document_id(title)
       )
     `,
     )
     .order('created_at', { ascending: false })
-    .limit(100);
+    .limit(limit);
 }
+
+export type InterviewSession = QueryData<ReturnType<typeof getInterviewSessions>>[number];
 
 export async function getInterviewSessionById(id: string) {
   const supabase = await supabaseServer();
@@ -155,7 +163,9 @@ export async function getInterviewQuestionsWithAnswers(sessionId: string) {
 
   const { data: answers, error: answersError } = await supabase
     .from('interview_answers')
-    .select('question_id, answer_text, answer_audio_url, answer_mode, created_at, updated_at, evaluation_score, evaluation_result, evaluated_at')
+    .select(
+      'question_id, answer_text, answer_audio_url, answer_mode, created_at, updated_at, evaluation_score, evaluation_result, evaluated_at',
+    )
     .eq('session_id', sessionId);
 
   if (answersError) {
@@ -177,8 +187,8 @@ export async function getInterviewQuestionsWithAnswers(sessionId: string) {
 export async function getDashboardStats() {
   const supabase = await supabaseServer();
 
-  const [docsResult, jdCount, cvCount, analysesResult, interviewsResult, inProgressCount] =
-    await Promise.all([
+  const [docsResult, jdCount, cvCount, analysesResult, interviewsResult, inProgressCount] = await Promise.all(
+    [
       supabase.from('documents').select('id', { count: 'exact', head: true }),
       supabase.from('documents').select('id', { count: 'exact', head: true }).eq('kind', 'jd'),
       supabase.from('documents').select('id', { count: 'exact', head: true }).eq('kind', 'cv'),
@@ -188,7 +198,8 @@ export async function getDashboardStats() {
         .from('interview_sessions')
         .select('id', { count: 'exact', head: true })
         .in('status', ['pending', 'in_progress']),
-    ]);
+    ],
+  );
 
   const analyses = analysesResult.data ?? [];
   const avgScore =
@@ -271,6 +282,8 @@ export async function getActiveInterviewSessions() {
 
   return { data: sessionsWithProgress, error: null };
 }
+
+export type InterviewSessionWithProgress = QueryData<ReturnType<typeof getActiveInterviewSessions>>[number];
 
 export async function getRecentAnalyses(limit: number = 3) {
   const supabase = await supabaseServer();

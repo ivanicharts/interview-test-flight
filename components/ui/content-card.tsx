@@ -1,15 +1,28 @@
-export const ContentSection = ({
+import { cn } from '@/lib/utils';
+
+export const ContentCard = ({
   title,
   description,
   label,
   children,
+  borderless = false,
+  borderlessMobile = false,
 }: {
   title?: string;
   description?: React.ReactNode;
   label?: React.ReactNode;
   children: React.ReactNode;
+  borderless?: boolean;
+  borderlessMobile?: boolean;
 }) => (
-  <section className="md:bg-card items space-y-2 md:rounded-xl md:border md:p-5">
+  <section
+    className={cn(
+      'items space-y-2',
+      // 'md:bg-card md:rounded-xl md:border md:p-5',
+      !borderless && 'md:bg-card md:rounded-xl md:border md:p-5',
+      !borderless && !borderlessMobile && 'bg-card rounded-xl border p-4',
+    )}
+  >
     <div>
       {title || label ? (
         <div className="flex flex-wrap items-center justify-between gap-2">

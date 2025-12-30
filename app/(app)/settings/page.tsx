@@ -2,11 +2,10 @@
 
 import * as React from 'react';
 
-import { PageSection } from '@/components/ui/page-section';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ContentSection } from '@/components/ui/content-section';
+import { Button } from '@/components/ui/button';
+import { ContentCard } from '@/components/ui/content-card';
+import { PageSection } from '@/components/ui/page-section';
 
 import { signOutAction } from './actions';
 
@@ -33,15 +32,15 @@ export default function SettingsPage() {
           </Alert>
         ) : null}
 
-        <ContentSection title="Account" description="Sign out of this device.">
+        <ContentCard title="Account" description="Sign out of this device.">
           <Button variant="destructive" onClick={signOut} loading={isPending}>
             Sign out
           </Button>
-        </ContentSection>
+        </ContentCard>
 
-        <ContentSection title="Privacy" description='Step 7+: "Delete my data" and "Delete account" flows.'>
+        <ContentCard title="Privacy" description='Step 7+: "Delete my data" and "Delete account" flows.'>
           TODO: implement deletion endpoints + confirmations.
-        </ContentSection>
+        </ContentCard>
       </div>
     </PageSection>
   );
