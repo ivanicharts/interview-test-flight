@@ -1,15 +1,17 @@
 'use client';
 
-import * as React from 'react';
 import Link from 'next/link';
+import * as React from 'react';
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { List, ListItem, ListItemContent, ListItemActions } from '@/components/ui/list';
-import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Document } from '@/lib/types';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { Input } from '@/components/ui/input';
+import { List, ListItem, ListItemActions, ListItemContent } from '@/components/ui/list';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 import { deleteDocumentAction } from '../actions';
 
 function label(kind: Document['kind']) {

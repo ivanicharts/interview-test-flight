@@ -1,31 +1,37 @@
 'use client';
 
+import { DocumentForm } from '@/app/(app)/documents/components/document-submit-form-ui';
+import { useSubmitDocumentForm } from '@/app/(app)/documents/components/useSubmitDocumentForm';
 import { useUserDocuments } from '@/app/(app)/documents/hooks/use-user-document';
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useState } from 'react';
 
 import { DocumentPicker } from '@/components/document-picker';
 import { Button } from '@/components/ui/button';
-import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
+import { ErrorAlert } from '@/components/ui/error-alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
 
+import { DocumentsLoader } from './animations/documents-loader';
 import { WizardStepContainer } from './components/wizard-step-container';
 import { useWizardStore } from './store/wizard-store';
 
+const DOCUMENT_TYPE = 'jd';
+const FORM_ID = 'wizard-jd-form';
+
 export function WizardStepJD() {
   const setJDData = useWizardStore((state) => state.setJDData);
-  const setError = useWizardStore((state) => state.setError);
   const goBack = useWizardStore((state) => state.goBack);
 
   const [mode, setMode] = useState<'select' | 'create'>('select');
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
 
-  const { data: jdData, isLoading } = useUserDocuments('jd');
+  const { onSubmit, error, isPending, title, setTitle, content, setContent } = useSubmitDocumentForm({
+    documentType: DOCUMENT_TYPE,
+    onSuccess: (id: string, newTitle: string) => {
+      setJDData(id, newTitle);
+    },
+  });
 
+  const { data: jdData, isLoading } = useUserDocuments(DOCUMENT_TYPE);
   const jds = jdData?.documents || [];
 
   // Auto-select first JD or switch to create mode
@@ -45,30 +51,8 @@ export function WizardStepJD() {
     }
   };
 
-  const handleCreateNew = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // startTransition(async () => {
-    //   const result = await createDocumentAction({
-    //     documentType: 'jd',
-    //     title: title.trim(),
-    //     content: content.trim(),
-    //   });
-
-    //   if (result.error) {
-    //     setError(result.error);
-    //   } else if (result.data) {
-    //     setJDData(result.data.id, title.trim());
-    //   }
-    // });
-  };
-
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-sm text-muted-foreground">Loading your job descriptions...</div>
-      </div>
-    );
+    return <DocumentsLoader />;
   }
 
   const nextCta =
@@ -77,7 +61,7 @@ export function WizardStepJD() {
         Continue with Selected JD
       </Button>
     ) : (
-      <Button type="submit" loading={isPending} disabled={content.length < 200}>
+      <Button type="submit" loading={isPending} form={FORM_ID}>
         Create & Continue
       </Button>
     );
@@ -99,6 +83,8 @@ export function WizardStepJD() {
           <TabsTrigger value="create">Create New</TabsTrigger>
         </TabsList>
 
+        {error && <ErrorAlert message={error} />}
+
         <TabsContent value="select" className="space-y-4 mt-4">
           {jds.length === 0 ? (
             <div className="text-center py-8">
@@ -112,33 +98,17 @@ export function WizardStepJD() {
         </TabsContent>
 
         <TabsContent value="create" className="space-y-4 mt-6">
-          <form onSubmit={handleCreateNew} className="space-y-4">
-            <Field>
-              <FieldLabel>Job Description Title</FieldLabel>
-              <Input
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g., Senior Frontend Developer at Acme Inc"
-                required
-              />
-            </Field>
-
-            <Field>
-              <FieldLabel>Job Description Content</FieldLabel>
-              <Textarea
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Paste the job description here..."
-                className="min-h-60"
-                minLength={200}
-                required
-              />
-              <FieldDescription>{content.length} / 200 characters minimum</FieldDescription>
-            </Field>
-          </form>
+          <DocumentForm
+            formId={FORM_ID}
+            documentType={DOCUMENT_TYPE}
+            onSubmit={onSubmit}
+            title={title}
+            onTitleChange={setTitle}
+            content={content}
+            onContentChange={setContent}
+          />
         </TabsContent>
       </Tabs>
-      {/* <div className="flex flex-row gap-2 absolute bottom-0 left-0 right-0 p-4"> */}
     </WizardStepContainer>
   );
 }
