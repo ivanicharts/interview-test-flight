@@ -36,7 +36,7 @@ export function InterviewsList({ interviewSessions }: Props) {
                     : 'Pending'}
               </Badge>
               <Link href={`/interviews/${session.id}`} className="line-clamp-1 font-medium hover:underline">
-                {session.analysis.jd_document.title || 'Interview Session'}
+                {(session.analysis as any).jd_document.title || 'Interview Session'}
               </Link>
             </div>
             <div className="text-muted-foreground mt-1 text-xs">
