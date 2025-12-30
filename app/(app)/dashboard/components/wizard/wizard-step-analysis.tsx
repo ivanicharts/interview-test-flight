@@ -5,40 +5,38 @@ import { CheckCircle2 } from 'lucide-react';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { createAnalysisAction } from '@/app/(app)/analysis/actions';
-
-import type { WizardState } from './start-flow-wizard';
+import { useWizardStore } from './store/wizard-store';
 import { AnalysisLoadingAnimation } from './animations/analysis-generation-animation';
 
-interface WizardStepAnalysisProps {
-  state: WizardState;
-  onNext: (updates: Partial<WizardState>) => void;
-}
+export function WizardStepAnalysis() {
+  const cvId = useWizardStore((state) => state.cvId);
+  const jdId = useWizardStore((state) => state.jdId);
+  const cvTitle = useWizardStore((state) => state.cvTitle);
+  const jdTitle = useWizardStore((state) => state.jdTitle);
+  const analysisId = useWizardStore((state) => state.analysisId);
+  const setAnalysisData = useWizardStore((state) => state.setAnalysisData);
+  const setError = useWizardStore((state) => state.setError);
 
-export function WizardStepAnalysis({ state, onNext }: WizardStepAnalysisProps) {
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
-    if (state.cvId && state.jdId && !state.analysisId && !isPending) {
+    if (cvId && jdId && !analysisId && !isPending) {
       runAnalysis();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.cvId, state.jdId, state.analysisId]);
+  }, [cvId, jdId, analysisId]);
 
   const runAnalysis = () => {
     startTransition(async () => {
       const result = await createAnalysisAction({
-        jdId: state.jdId!,
-        cvId: state.cvId!,
+        jdId: jdId!,
+        cvId: cvId!,
       });
 
       if (result.error) {
-        onNext({ error: result.error, isLoading: false });
+        setError(result.error);
       } else if (result.data) {
-        onNext({
-          analysisId: result.data.id,
-          currentStep: 'interview',
-          isLoading: false,
-        });
+        setAnalysisData(result.data.id);
       }
     });
   };
@@ -48,7 +46,7 @@ export function WizardStepAnalysis({ state, onNext }: WizardStepAnalysisProps) {
       <div>
         <h3 className="text-lg font-semibold">Analyzing your match...</h3>
         <p className="text-muted-foreground mt-2 text-sm">
-          Comparing &quot;{state.cvTitle}&quot; with &quot;{state.jdTitle}&quot;
+          Comparing &quot;{cvTitle}&quot; with &quot;{jdTitle}&quot;
         </p>
       </div>
 
@@ -63,7 +61,7 @@ export function WizardStepAnalysis({ state, onNext }: WizardStepAnalysisProps) {
         </div>
       )}
 
-      {state.analysisId && !isPending && (
+      {analysisId && !isPending && (
         <Alert>
           <CheckCircle2 className="h-4 w-4" />
           <AlertDescription>Analysis complete! Generating interview questions...</AlertDescription>

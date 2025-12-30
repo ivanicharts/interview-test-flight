@@ -1,10 +1,12 @@
 'use client';
 
 import { AlertCircle } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { ErrorAlert } from '@/components/ui/error-alert';
 import {
   Sheet,
   SheetContent,
@@ -14,6 +16,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 
+import { useWizardStore } from './store/wizard-store';
 import { WizardCompletion } from './wizard-completion';
 import { WizardStepAnalysis } from './wizard-step-analysis';
 import { WizardStepCV } from './wizard-step-cv';
@@ -21,20 +24,8 @@ import { WizardStepIndicator } from './wizard-step-indicator';
 import { WizardStepInterview } from './wizard-step-interview';
 import { WizardStepJD } from './wizard-step-jd';
 
-export type WizardStep = 'cv' | 'jd' | 'analysis' | 'interview' | 'complete';
-
-export interface WizardState {
-  currentStep: WizardStep;
-  cvId: string | null;
-  cvTitle: string | null;
-  jdId: string | null;
-  jdTitle: string | null;
-  analysisId: string | null;
-  interviewId: string | null;
-  questionCount: number | null;
-  error: string | null;
-  isLoading: boolean;
-}
+// Re-export types from store for backwards compatibility
+export type { WizardStep, WizardState } from './store/wizard-store';
 
 interface StartFlowWizardProps {
   open: boolean;
@@ -42,61 +33,25 @@ interface StartFlowWizardProps {
 }
 
 export function StartFlowWizard({ open, onOpenChange }: StartFlowWizardProps) {
-  const [state, setState] = useState<WizardState>({
-    currentStep: 'cv',
-    cvId: null,
-    cvTitle: null,
-    jdId: null,
-    jdTitle: null,
-    analysisId: null,
-    interviewId: null,
-    questionCount: null,
-    error: null,
-    isLoading: false,
-  });
+  const [currentStep, error, isLoading, goBack, reset] = useWizardStore(
+    useShallow((state) => [state.currentStep, state.error, state.isLoading, state.goBack, state.reset]),
+  );
 
-  const handleNext = (updates: Partial<WizardState>) => {
-    setState((prev) => ({ ...prev, ...updates, error: null }));
-  };
-
-  const handleBack = () => {
-    const steps: WizardStep[] = ['cv', 'jd', 'analysis', 'interview', 'complete'];
-    const currentIndex = steps.indexOf(state.currentStep);
-    if (currentIndex > 0) {
-      setState((prev) => ({
-        ...prev,
-        currentStep: steps[currentIndex - 1],
-        error: null,
-      }));
-    }
-  };
-
-  const canGoBack = () => {
-    if (state.currentStep === 'cv') return false;
-    if (state.currentStep === 'complete') return false;
-    if (state.currentStep === 'interview' || state.currentStep === 'analysis') {
-      return state.analysisId === null;
-    }
-    return true;
-  };
+  const canGoBack = () => currentStep === 1;
 
   const handleClose = (shouldClose: boolean) => {
     if (shouldClose) {
-      setState({
-        currentStep: 'cv',
-        cvId: null,
-        cvTitle: null,
-        jdId: null,
-        jdTitle: null,
-        analysisId: null,
-        interviewId: null,
-        questionCount: null,
-        error: null,
-        isLoading: false,
-      });
+      reset();
     }
     onOpenChange(shouldClose);
   };
+
+  // Reset state when wizard closes
+  useEffect(() => {
+    if (!open) {
+      reset();
+    }
+  }, [open, reset]);
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
@@ -107,29 +62,22 @@ export function StartFlowWizard({ open, onOpenChange }: StartFlowWizardProps) {
         </SheetHeader>
 
         <div className="px-4">
-          <WizardStepIndicator currentStep={state.currentStep} />
-        </div>
+          <WizardStepIndicator currentStep={currentStep} />
 
-        <div className="flex-1 px-4 py-6">
-          {state.currentStep === 'cv' && <WizardStepCV state={state} onNext={handleNext} />}
-          {state.currentStep === 'jd' && <WizardStepJD state={state} onNext={handleNext} />}
-          {state.currentStep === 'analysis' && <WizardStepAnalysis state={state} onNext={handleNext} />}
-          {state.currentStep === 'interview' && <WizardStepInterview state={state} onNext={handleNext} />}
-          {state.currentStep === 'complete' && (
-            <WizardCompletion state={state} onClose={() => handleClose(false)} />
-          )}
-        </div>
+          <div className="flex-1 py-6">
+            {currentStep === 0 && <WizardStepCV />}
+            {currentStep === 1 && <WizardStepJD />}
+            {currentStep === 2 && <WizardStepAnalysis />}
+            {currentStep === 3 && <WizardStepInterview />}
+            {currentStep === 4 && <WizardCompletion onClose={() => handleClose(false)} />}
+          </div>
 
-        {state.error && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{state.error}</AlertDescription>
-          </Alert>
-        )}
+          {error && <ErrorAlert message={error} />}
+        </div>
 
         <SheetFooter className="flex gap-2">
           {canGoBack() && (
-            <Button variant="outline" onClick={handleBack} disabled={state.isLoading}>
+            <Button variant="outline" onClick={goBack} disabled={isLoading}>
               Back
             </Button>
           )}

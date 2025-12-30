@@ -2,40 +2,34 @@
 
 import { useEffect, useTransition } from 'react';
 import { createInterviewAction } from '@/app/(app)/interviews/actions';
-
-import type { WizardState } from './start-flow-wizard';
+import { useWizardStore } from './store/wizard-store';
 import { InterviewGenerationAnimation } from './animations/interview-generation-animation';
 
-interface WizardStepInterviewProps {
-  state: WizardState;
-  onNext: (updates: Partial<WizardState>) => void;
-}
+export function WizardStepInterview() {
+  const analysisId = useWizardStore((state) => state.analysisId);
+  const interviewId = useWizardStore((state) => state.interviewId);
+  const setInterviewData = useWizardStore((state) => state.setInterviewData);
+  const setError = useWizardStore((state) => state.setError);
 
-export function WizardStepInterview({ state, onNext }: WizardStepInterviewProps) {
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
-    if (state.analysisId && !state.interviewId && !isPending) {
+    if (analysisId && !interviewId && !isPending) {
       runInterviewGeneration();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.analysisId, state.interviewId]);
+  }, [analysisId, interviewId]);
 
   const runInterviewGeneration = () => {
     startTransition(async () => {
       const result = await createInterviewAction({
-        analysisId: state.analysisId!,
+        analysisId: analysisId!,
       });
 
       if (result.error) {
-        onNext({ error: result.error, isLoading: false });
+        setError(result.error);
       } else if (result.data) {
-        onNext({
-          interviewId: result.data.id,
-          questionCount: result.data.questionCount || null,
-          currentStep: 'complete',
-          isLoading: false,
-        });
+        setInterviewData(result.data.id, result.data.questionCount);
       }
     });
   };

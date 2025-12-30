@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Field, FieldLabel, FieldDescription } from '@/components/ui/field';
 import { getDocumentsAction, createDocumentAction } from '@/app/(app)/documents/actions';
-import type { WizardState } from './start-flow-wizard';
+import { useWizardStore } from './store/wizard-store';
 
 interface Document {
   id: string;
@@ -17,12 +17,10 @@ interface Document {
   kind: 'cv' | 'jd';
 }
 
-interface WizardStepJDProps {
-  state: WizardState;
-  onNext: (updates: Partial<WizardState>) => void;
-}
+export function WizardStepJD() {
+  const setJDData = useWizardStore((state) => state.setJDData);
+  const setError = useWizardStore((state) => state.setError);
 
-export function WizardStepJD({ state, onNext }: WizardStepJDProps) {
   const [mode, setMode] = useState<'select' | 'create'>('select');
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -55,11 +53,7 @@ export function WizardStepJD({ state, onNext }: WizardStepJDProps) {
     if (!selectedId) return;
     const selected = jds.find((jd) => jd.id === selectedId);
     if (selected) {
-      onNext({
-        jdId: selectedId,
-        jdTitle: selected.title,
-        currentStep: 'analysis',
-      });
+      setJDData(selectedId, selected.title);
     }
   };
 
@@ -74,13 +68,9 @@ export function WizardStepJD({ state, onNext }: WizardStepJDProps) {
       });
 
       if (result.error) {
-        onNext({ error: result.error });
+        setError(result.error);
       } else if (result.data) {
-        onNext({
-          jdId: result.data.id,
-          jdTitle: title.trim(),
-          currentStep: 'analysis',
-        });
+        setJDData(result.data.id, title.trim());
       }
     });
   };

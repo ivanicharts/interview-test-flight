@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Field, FieldLabel, FieldDescription } from '@/components/ui/field';
 import { getDocumentsAction, createDocumentAction } from '@/app/(app)/documents/actions';
-import type { WizardState } from './start-flow-wizard';
+import { useWizardStore } from './store/wizard-store';
 
 interface Document {
   id: string;
@@ -17,12 +17,10 @@ interface Document {
   kind: 'cv' | 'jd';
 }
 
-interface WizardStepCVProps {
-  state: WizardState;
-  onNext: (updates: Partial<WizardState>) => void;
-}
+export function WizardStepCV() {
+  const setCVData = useWizardStore((state) => state.setCVData);
+  const setError = useWizardStore((state) => state.setError);
 
-export function WizardStepCV({ state, onNext }: WizardStepCVProps) {
   const [mode, setMode] = useState<'select' | 'create'>('select');
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -55,11 +53,7 @@ export function WizardStepCV({ state, onNext }: WizardStepCVProps) {
     if (!selectedId) return;
     const selected = cvs.find((cv) => cv.id === selectedId);
     if (selected) {
-      onNext({
-        cvId: selectedId,
-        cvTitle: selected.title,
-        currentStep: 'jd',
-      });
+      setCVData(selectedId, selected.title);
     }
   };
 
@@ -74,13 +68,9 @@ export function WizardStepCV({ state, onNext }: WizardStepCVProps) {
       });
 
       if (result.error) {
-        onNext({ error: result.error });
+        setError(result.error);
       } else if (result.data) {
-        onNext({
-          cvId: result.data.id,
-          cvTitle: title.trim(),
-          currentStep: 'jd',
-        });
+        setCVData(result.data.id, title.trim());
       }
     });
   };

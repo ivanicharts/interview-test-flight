@@ -3,18 +3,21 @@
 import { useRouter } from 'next/navigation';
 import { CheckCircle2, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import type { WizardState } from './start-flow-wizard';
+import { useWizardStore } from './store/wizard-store';
 
 interface WizardCompletionProps {
-  state: WizardState;
   onClose: () => void;
 }
 
-export function WizardCompletion({ state, onClose }: WizardCompletionProps) {
+export function WizardCompletion({ onClose }: WizardCompletionProps) {
   const router = useRouter();
+  const interviewId = useWizardStore((state) => state.interviewId);
+  const questionCount = useWizardStore((state) => state.questionCount);
+  const cvTitle = useWizardStore((state) => state.cvTitle);
+  const jdTitle = useWizardStore((state) => state.jdTitle);
 
   const handleStartInterview = () => {
-    router.push(`/interviews/${state.interviewId}`);
+    router.push(`/interviews/${interviewId}`);
     onClose();
   };
 
@@ -28,18 +31,18 @@ export function WizardCompletion({ state, onClose }: WizardCompletionProps) {
         <h3 className="text-xl font-semibold">All Set!</h3>
         <p className="text-muted-foreground mt-2">
           Your interview prep is ready.{' '}
-          {state.questionCount ? `${state.questionCount} questions generated.` : ''}
+          {questionCount ? `${questionCount} questions generated.` : ''}
         </p>
       </div>
 
       <div className="space-y-2 text-sm text-left bg-muted/20 p-4 rounded-lg">
         <div className="flex items-center gap-2">
           <Check className="h-4 w-4 text-green-600" />
-          <span>CV: {state.cvTitle}</span>
+          <span>CV: {cvTitle}</span>
         </div>
         <div className="flex items-center gap-2">
           <Check className="h-4 w-4 text-green-600" />
-          <span>JD: {state.jdTitle}</span>
+          <span>JD: {jdTitle}</span>
         </div>
         <div className="flex items-center gap-2">
           <Check className="h-4 w-4 text-green-600" />

@@ -1,17 +1,18 @@
 'use client';
 
+import { Check, ChevronLeft, ChevronRight, Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Eye, EyeOff, Check } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Pill, type PillProps } from '@/components/ui/pill';
+import type { AnswerEvaluation, InterviewPlan } from '@/lib/ai/schemas';
 import { cn } from '@/lib/utils';
-import type { InterviewPlan, AnswerEvaluation } from '@/lib/ai/schemas';
 
-import { AnswerInput } from './answer-input';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Pill, type PillProps } from '@/components/ui/pill';
+import { Progress } from '@/components/ui/progress';
+
 import { submitAnswerAction } from '../../actions';
+import { AnswerInput } from './answer-input';
 
 interface QuestionWithAnswer {
   id: string;
@@ -236,7 +237,7 @@ export function InterviewPlayer({ plan, sessionId, questionsWithAnswers }: Inter
                       'flex w-full flex-col gap-1 rounded-md border p-3 text-left transition',
                       currentIndex !== index && 'cursor-pointer hover:bg-muted/30',
                       currentIndex === index
-                        ? 'border-primary/30 bg-muted'
+                        ? 'border-primary/10 bg-muted'
                         : 'border-border/60 bg-background',
                     )}
                   >
@@ -249,11 +250,15 @@ export function InterviewPlayer({ plan, sessionId, questionsWithAnswers }: Inter
                         {question.category}
                       </Badge>
                       {isAnswered && <Check className="ml-auto h-3 w-3 text-green-600 dark:text-green-400" />}
-                      {questionData.answer?.evaluation_score !== null && questionData.answer?.evaluation_score !== undefined && (
-                        <Pill tone={getScoreTone(questionData.answer.evaluation_score)} className="ml-auto text-[10px]">
-                          {questionData.answer.evaluation_score}
-                        </Pill>
-                      )}
+                      {questionData.answer?.evaluation_score !== null &&
+                        questionData.answer?.evaluation_score !== undefined && (
+                          <Pill
+                            tone={getScoreTone(questionData.answer.evaluation_score)}
+                            className="ml-auto text-[10px]"
+                          >
+                            {questionData.answer.evaluation_score}
+                          </Pill>
+                        )}
                     </div>
                     <div className="line-clamp-2 text-xs">{question.questionText}</div>
                   </button>
