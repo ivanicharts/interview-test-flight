@@ -38,7 +38,6 @@ export async function analyzeJDAndCV(args: {
   const cv = clip(args.cvText, MAX_DOCUMENT_CONTENT_LENGTH);
 
   // Parsed object already validated by the SDK + schema, but keep a final parse as a guard.
-
   const response = await openai.responses.parse({
     model: args.model,
 
@@ -47,7 +46,7 @@ export async function analyzeJDAndCV(args: {
 
     // (Optional) Tune reasoning cost/latency for GPT-5 family
     // For extraction/structured scoring, "minimal" or "low" is usually enough.
-    reasoning: { effort: 'minimal' }, // or "low"
+    reasoning: { effort: 'low' }, // or "low"
 
     safety_identifier: args.safetyIdentifier, //
 

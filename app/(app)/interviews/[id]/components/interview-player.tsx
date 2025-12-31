@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, ChevronLeft, ChevronRight, Eye, EyeOff } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 
 import type { AnswerEvaluation, InterviewPlan } from '@/lib/ai/schemas';
@@ -41,6 +41,7 @@ interface InterviewPlayerProps {
 export function InterviewPlayer({ plan, sessionId, questionsWithAnswers }: InterviewPlayerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showRubric, setShowRubric] = useState(false);
+  const [evaluatingQuestionIds, setEvaluatingQuestionIds] = useState<Set<string>>(new Set());
   const [answeredQuestionIds, setAnsweredQuestionIds] = useState<Set<string>>(
     new Set(questionsWithAnswers.filter((q) => q.answer?.answer_text).map((q) => q.id)),
   );
@@ -68,6 +69,15 @@ export function InterviewPlayer({ plan, sessionId, questionsWithAnswers }: Inter
   const handleAnswerSubmitSuccess = () => {
     // Mark question as answered (optimistic update)
     setAnsweredQuestionIds((prev) => new Set([...prev, currentQuestionData.id]));
+    // Remove from evaluating set
+    setEvaluatingQuestionIds(
+      (prev) =>
+        new Set([...prev].filter((id) => id !== currentQuestionData.id && !answeredQuestionIds.has(id))),
+    );
+  };
+
+  const handleAnswerSubmitAttempt = () => {
+    setEvaluatingQuestionIds((prev) => new Set([...prev, currentQuestionData.id]));
   };
 
   return (
@@ -196,6 +206,7 @@ export function InterviewPlayer({ plan, sessionId, questionsWithAnswers }: Inter
               evaluation={currentQuestionData.answer?.evaluation_result}
               submitAction={submitAnswerAction}
               onSubmitSuccess={handleAnswerSubmitSuccess}
+              onSubmitAttempt={handleAnswerSubmitAttempt}
             />
           </div>
 
@@ -228,6 +239,7 @@ export function InterviewPlayer({ plan, sessionId, questionsWithAnswers }: Inter
               {plan.questions.map((question, index) => {
                 const questionData = questionsWithAnswers[index];
                 const isAnswered = answeredQuestionIds.has(questionData.id);
+                const isEvaluating = evaluatingQuestionIds.has(questionData.id);
 
                 return (
                   <button
@@ -249,16 +261,21 @@ export function InterviewPlayer({ plan, sessionId, questionsWithAnswers }: Inter
                       >
                         {question.category}
                       </Badge>
-                      {isAnswered && <Check className="ml-auto h-3 w-3 text-green-600 dark:text-green-400" />}
-                      {questionData.answer?.evaluation_score !== null &&
-                        questionData.answer?.evaluation_score !== undefined && (
-                          <Pill
-                            tone={getScoreTone(questionData.answer.evaluation_score)}
-                            className="ml-auto text-[10px]"
-                          >
-                            {questionData.answer.evaluation_score}
-                          </Pill>
+                      <div className="flex ml-auto items-center gap-1">
+                        {isAnswered && (
+                          <Check className="ml-auto h-3 w-3 text-green-600 dark:text-green-400" />
                         )}
+                        {isEvaluating && <Loader2 className="h-3 w-3 animate-spin" />}
+                        {questionData.answer?.evaluation_score !== null &&
+                          questionData.answer?.evaluation_score !== undefined && (
+                            <Pill
+                              tone={getScoreTone(questionData.answer.evaluation_score)}
+                              className="ml-auto text-[10px]"
+                            >
+                              {questionData.answer.evaluation_score}
+                            </Pill>
+                          )}
+                      </div>
                     </div>
                     <div className="line-clamp-2 text-xs">{question.questionText}</div>
                   </button>

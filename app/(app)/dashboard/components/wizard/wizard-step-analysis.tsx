@@ -49,7 +49,7 @@ export function WizardStepAnalysis() {
       {!analysisId && !isPending && (
         <div>
           <h3 className="text-lg font-semibold">Ready to analyze your match?</h3>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-muted-foreground text-sm mt-2 mx-auto max-w-md">
             We will compare &quot;{cvTitle}&quot; with &quot;{jdTitle}&quot; to identify key strengths and
             gaps.
           </p>
@@ -60,7 +60,7 @@ export function WizardStepAnalysis() {
         <div className="flex flex-col items-center gap-6 py-8">
           <div>
             <h3 className="text-lg font-semibold">Analyzing your match...</h3>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-sm  mt-2 mx-auto max-w-md">
               Comparing &quot;{cvTitle}&quot; with &quot;{jdTitle}&quot;
             </p>
           </div>

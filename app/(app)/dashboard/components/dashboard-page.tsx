@@ -34,19 +34,6 @@ type Props = {
 export const DashboardPage = ({ hasAnyData, stats, activeSessions, recentAnalyses }: Props) => {
   const [wizardOpen, setWizardOpen] = useState(false);
 
-  if (!hasAnyData) {
-    return (
-      <>
-        <PageSection title="Dashboard" description="Your progress and activity across interview prep">
-          <div className="space-y-6">
-            <EmptyDashboardState onStartFlow={() => setWizardOpen(true)} />
-          </div>
-        </PageSection>
-        <StartFlowWizard open={wizardOpen} onOpenChange={setWizardOpen} />
-      </>
-    );
-  }
-
   return (
     <>
       <PageSection
@@ -55,14 +42,20 @@ export const DashboardPage = ({ hasAnyData, stats, activeSessions, recentAnalyse
         actions={<Button onClick={() => setWizardOpen(true)}>Start New Flow</Button>}
       >
         <div className="space-y-6">
-          {/* Stats Overview - Always show if data exists */}
-          <StatsOverview stats={stats} />
+          {hasAnyData ? (
+            <>
+              {/* Stats Overview - Always show if data exists */}
+              <StatsOverview stats={stats} />
 
-          {/* Active Sessions - Only if in-progress/pending exist */}
-          {activeSessions.length > 0 && <ActiveSessionsSection sessions={activeSessions} />}
+              {/* Active Sessions - Only if in-progress/pending exist */}
+              {activeSessions.length > 0 && <ActiveSessionsSection sessions={activeSessions} />}
 
-          {/* Recent Analyses - Only if analyses exist */}
-          {recentAnalyses.length > 0 && <RecentAnalysesSection analyses={recentAnalyses} />}
+              {/* Recent Analyses - Only if analyses exist */}
+              {recentAnalyses.length > 0 && <RecentAnalysesSection analyses={recentAnalyses} />}
+            </>
+          ) : (
+            <EmptyDashboardState onStartFlow={() => setWizardOpen(true)} />
+          )}
         </div>
       </PageSection>
       <StartFlowWizard open={wizardOpen} onOpenChange={setWizardOpen} />

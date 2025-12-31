@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useTransition } from 'react';
 import { Check } from 'lucide-react';
+import { useState, useTransition } from 'react';
+
+import type { AnswerEvaluation } from '@/lib/ai/schemas';
 
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import type { AnswerEvaluation } from '@/lib/ai/schemas';
+
 import { AnswerEvaluation as AnswerEvaluationComponent } from './answer-evaluation';
 
 interface AnswerInputProps {
@@ -14,6 +16,7 @@ interface AnswerInputProps {
   initialAnswer?: string | null;
   evaluation?: AnswerEvaluation | null;
   onSubmitSuccess?: () => void;
+  onSubmitAttempt?: () => void;
   submitAction: (data: {
     sessionId: string;
     questionId: string;
@@ -27,6 +30,7 @@ export function AnswerInput({
   initialAnswer,
   evaluation,
   onSubmitSuccess,
+  onSubmitAttempt,
   submitAction,
 }: AnswerInputProps) {
   const [answerText, setAnswerText] = useState(initialAnswer || '');
@@ -41,6 +45,7 @@ export function AnswerInput({
     if (!canSubmit) return;
 
     setError(null);
+    onSubmitAttempt?.();
 
     startTransition(async () => {
       const result = await submitAction({
@@ -77,7 +82,7 @@ export function AnswerInput({
           value={answerText}
           onChange={(e) => setAnswerText(e.target.value)}
           placeholder="Type your answer here... (minimum 10 characters)"
-          className="min-h-32 resize-y"
+          className="min-h-32 max-h-100 resize-y"
           disabled={isPending}
         />
         <div className="mt-1 flex items-center justify-between text-xs text-muted-foreground">

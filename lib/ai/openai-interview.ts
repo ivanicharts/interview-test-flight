@@ -68,7 +68,7 @@ export async function generateInterviewPlan(args: {
   const response = await openai.responses.parse({
     model: args.model,
     store: false,
-    reasoning: { effort: 'low' },
+    reasoning: { effort: 'medium' },
     safety_identifier: args.safetyIdentifier,
 
     input: [
