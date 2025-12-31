@@ -1,36 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Interview Prep Application
 
-## Getting Started
+> **Note**: This is a personal pet project created as a portfolio piece and code example to demonstrate modern web development practices.
 
-First, run the development server:
+An AI-powered interview preparation tool that helps candidates prepare for job interviews by analyzing their CV against job descriptions and generating personalized interview questions with real-time feedback.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Tech Stack
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Framework**: Next.js 16 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS v4
+- **UI Components**: shadcn/ui (Radix UI primitives)
+- **Authentication**: Supabase Auth (password + OTP)
+- **Database**: Supabase (PostgreSQL)
+- **AI**: OpenAI GPT-5 (structured outputs)
+- **State Management**: Zustand
+- **Data Fetching**: SWR
+- **Voice Input**: Web Speech API
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- 📄 **Document Management**: Upload and manage CVs and job descriptions
+- 🤖 **AI Analysis**: Compare CV against JD to identify strengths and gaps
+- 💬 **Interview Simulation**: Practice with AI-generated questions
+- 🎤 **Voice Input**: Answer questions using speech-to-text
+- 📊 **Real-time Feedback**: Get instant AI evaluation of your answers
+- 🎯 **Guided Wizard**: Step-by-step flow from CV to interview session
+- 🌙 **Dark Mode**: Full theme support
 
-## Learn More
+## Demo
 
-To learn more about Next.js, take a look at the following resources:
+Video url
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deployed on Vercel
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+https://interview-test-flight.vercel.app/
