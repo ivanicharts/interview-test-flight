@@ -29,7 +29,7 @@ An AI-powered interview preparation tool that helps candidates prepare for job i
 
 ## Demo
 
-Video url
+https://drive.google.com/file/d/12GWF_5Aeax4o-07N7z_hQG_VJJlyzlml/view?usp=sharing
 
 ## Deployed on Vercel
 
