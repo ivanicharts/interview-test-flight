@@ -25,7 +25,64 @@ export async function createAnalysis({
       model,
       match_score: result.overallScore,
       report: result, // jsonb
+      status: 'completed',
     })
+    .select('id')
+    .single();
+}
+
+// ==================== Analysis Streaming Mutations ====================
+
+export async function createAnalysisPlaceholder({
+  userId,
+  jdId,
+  cvId,
+  model,
+}: {
+  userId: string;
+  jdId: string;
+  cvId: string;
+  model: string;
+}) {
+  const supabase = await supabaseServer();
+  return supabase
+    .from('analyses')
+    .insert({
+      user_id: userId,
+      jd_document_id: jdId,
+      cv_document_id: cvId,
+      model,
+      status: 'processing',
+      match_score: 0, // Placeholder
+      report: {}, // Empty JSONB
+    })
+    .select('id')
+    .single();
+}
+
+export async function updateAnalysisResult(analysisId: string, result: AnalysisResult) {
+  const supabase = await supabaseServer();
+  return supabase
+    .from('analyses')
+    .update({
+      status: 'completed',
+      match_score: result.overallScore,
+      report: result,
+    })
+    .eq('id', analysisId)
+    .select('id')
+    .single();
+}
+
+export async function markAnalysisFailed(analysisId: string, error: string) {
+  const supabase = await supabaseServer();
+  return supabase
+    .from('analyses')
+    .update({
+      status: 'failed',
+      report: { error, meta: { failedAt: new Date().toISOString() } },
+    })
+    .eq('id', analysisId)
     .select('id')
     .single();
 }

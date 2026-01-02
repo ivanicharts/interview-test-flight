@@ -217,3 +217,46 @@ export const AnswerEvaluationSchema = z.object({
 
 export type DetectedSignal = z.infer<typeof DetectedSignalSchema>;
 export type AnswerEvaluation = z.infer<typeof AnswerEvaluationSchema>;
+
+// ==================== SSE Streaming Schemas ====================
+
+export const SSEEventSchema = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('started'),
+    data: z.object({
+      analysisId: z.string().uuid(),
+      model: z.string(),
+    }),
+  }),
+  z.object({
+    type: z.literal('progress'),
+    data: z.object({
+      stage: z.string(),
+      percent: z.number().int().min(0).max(100),
+    }),
+  }),
+  z.object({
+    type: z.literal('section'),
+    data: z.object({
+      section: z.enum(['overallScore', 'summary', 'strengths', 'gaps', 'evidence', 'rewriteSuggestions']),
+      content: z.any(), // Validated separately per section type
+    }),
+  }),
+  z.object({
+    type: z.literal('complete'),
+    data: z.object({
+      analysisId: z.string().uuid(),
+      result: AnalysisResultSchema,
+    }),
+  }),
+  z.object({
+    type: z.literal('error'),
+    data: z.object({
+      error: z.string().min(1).max(500),
+      retryable: z.boolean(),
+      retryAfter: z.number().int().positive().optional(), // seconds
+    }),
+  }),
+]);
+
+export type SSEEvent = z.infer<typeof SSEEventSchema>;

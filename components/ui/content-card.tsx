@@ -7,6 +7,7 @@ export const ContentCard = ({
   children,
   borderless = false,
   borderlessMobile = false,
+  className,
 }: {
   title?: string;
   description?: React.ReactNode;
@@ -14,6 +15,7 @@ export const ContentCard = ({
   children: React.ReactNode;
   borderless?: boolean;
   borderlessMobile?: boolean;
+  className?: string;
 }) => (
   <section
     className={cn(
@@ -21,6 +23,7 @@ export const ContentCard = ({
       // 'md:bg-card md:rounded-xl md:border md:p-5',
       !borderless && 'md:bg-card md:rounded-xl md:border md:p-5',
       !borderless && !borderlessMobile && 'bg-card rounded-xl border p-4',
+      className,
     )}
   >
     <div>
