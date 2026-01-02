@@ -1,15 +1,10 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { streamAnalysis } from '@/lib/ai/openai-streaming-analysis';
-import { hashedSafetyIdentifier } from '@/lib/ai/openai-analysis';
 import type { SSEEvent } from '@/lib/ai/schemas';
 
 import { getUser, getCachedAnalysis, getDocumentsByIds } from '@/lib/supabase/queries';
-import {
-  createAnalysisPlaceholder,
-  updateAnalysisResult,
-  markAnalysisFailed,
-} from '@/lib/supabase/mutations';
+import { createAnalysis } from '@/lib/supabase/mutations';
 
 export const runtime = 'nodejs';
 
@@ -58,7 +53,7 @@ export async function POST(req: Request) {
       const stream = createSSEStream(async (emit) => {
         emit({
           type: 'started',
-          data: { analysisId: cached.id, model },
+          data: { model },
         });
         emit({
           type: 'complete',
@@ -98,34 +93,11 @@ export async function POST(req: Request) {
 
   // Create SSE stream for real-time updates
   const stream = createSSEStream(async (emit) => {
-    let analysisId: string | null = null;
-
     try {
-      // Create placeholder analysis record
-      const { data: placeholder, error: placeholderErr } = await createAnalysisPlaceholder({
-        userId: user.id,
-        jdId,
-        cvId,
-        model,
-      });
-
-      if (placeholderErr || !placeholder) {
-        emit({
-          type: 'error',
-          data: {
-            error: 'Failed to create analysis record',
-            retryable: true,
-          },
-        });
-        return;
-      }
-
-      analysisId = placeholder.id;
-
-      // Emit started event (analysisId is guaranteed non-null here)
+      // Emit started event (no analysisId yet)
       emit({
         type: 'started',
-        data: { analysisId: analysisId!, model },
+        data: { model },
       });
 
       // Stream analysis from OpenAI with progress callbacks
@@ -133,7 +105,6 @@ export async function POST(req: Request) {
         jdText: jd.content ?? '',
         cvText: cv.content ?? '',
         model,
-        safetyIdentifier: hashedSafetyIdentifier(user.id),
 
         // Progress callback
         onProgress: (percent, stage) => {
@@ -152,28 +123,28 @@ export async function POST(req: Request) {
         },
       });
 
-      // Update database with final result (analysisId is guaranteed non-null here)
-      const { error: updateErr } = await updateAnalysisResult(analysisId!, result);
+      // Create analysis record (only once, at the end)
+      const { data: inserted, error: insertErr } = await createAnalysis({
+        userId: user.id,
+        jdId,
+        cvId,
+        model,
+        result,
+      });
 
-      if (updateErr) {
-        // Analysis succeeded but DB update failed - still return result
-        console.error('Failed to update analysis result:', updateErr);
+      if (insertErr || !inserted) {
+        throw new Error('Failed to save analysis');
       }
 
-      // Emit completion event (analysisId is guaranteed non-null here)
+      // Emit completion event
       emit({
         type: 'complete',
-        data: { analysisId: analysisId!, result },
+        data: { analysisId: inserted.id, result },
       });
     } catch (error: any) {
       console.error('Analysis streaming error:', error);
 
-      // Mark analysis as failed in DB
-      if (analysisId) {
-        await markAnalysisFailed(analysisId, error?.message || 'Unknown error');
-      }
-
-      // Emit error event
+      // Emit error event (no DB cleanup needed)
       const isRateLimit = error?.message?.includes('429') || error?.message?.includes('rate');
       emit({
         type: 'error',

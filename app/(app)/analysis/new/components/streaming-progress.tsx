@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { ContentCard } from '@/components/ui/content-card';
 import { Progress } from '@/components/ui/progress';
 
+import { AnalysisLoadingAnimation } from './analysis-generation-animation';
+
 interface StreamingProgressProps {
   percent: number;
   stage: string;
@@ -61,6 +63,8 @@ export function StreamingProgress({
         </div>
       </ContentCard>
 
+      {!partialResults?.overallScore && percent < 100 && <AnalysisLoadingAnimation />}
+
       {/* Partial results */}
       {partialResults && (
         <div className="space-y-4 animate-in fade-in-50 duration-300">
@@ -108,12 +112,19 @@ export function StreamingProgress({
               className="animate-in fade-in-50 slide-in-from-bottom-4 duration-500"
             >
               <ul className="space-y-2">
-                {partialResults.strengths.slice(0, 5).map((strength, index) => (
-                  <li key={index} className="flex items-start gap-2 text-sm">
-                    <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600" />
-                    <span>{strength}</span>
-                  </li>
-                ))}
+                {partialResults.strengths.slice(0, 5).map((strength: any, index: number) => {
+                  // Handle both string format and object format
+                  const text =
+                    typeof strength === 'string'
+                      ? strength
+                      : strength?.title || strength?.description || 'Strength';
+                  return (
+                    <li key={index} className="flex items-start gap-2 text-sm">
+                      <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600" />
+                      <span>{text}</span>
+                    </li>
+                  );
+                })}
                 {partialResults.strengths.length > 5 && (
                   <li className="text-xs text-muted-foreground">
                     +{partialResults.strengths.length - 5} more...

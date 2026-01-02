@@ -77,7 +77,7 @@ export const AnalysisResultSchema = z.object({
         title: z.string().min(1).max(120),
         whyItMatters: z.string().min(1).max(500),
         priority: z.enum(['high', 'medium', 'low']),
-        suggestions: z.array(z.string().min(1).max(200)).min(1).max(8),
+        suggestions: z.array(z.string().min(1).max(400)).min(1).max(8),
       }),
     )
     .max(20),
@@ -88,9 +88,9 @@ export const AnalysisResultSchema = z.object({
     experienceBullets: z
       .array(
         z.object({
-          section: z.string().min(1).max(120),
-          after: z.string().min(1).max(260),
-          rationale: z.string().min(1).max(220),
+          section: z.string().min(1).max(220),
+          after: z.string().min(1).max(360),
+          rationale: z.string().min(1).max(320),
         }),
       )
       .min(2)
@@ -224,7 +224,6 @@ export const SSEEventSchema = z.discriminatedUnion('type', [
   z.object({
     type: z.literal('started'),
     data: z.object({
-      analysisId: z.string().uuid(),
       model: z.string(),
     }),
   }),

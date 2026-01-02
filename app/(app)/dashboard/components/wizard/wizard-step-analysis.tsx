@@ -2,13 +2,13 @@
 
 import { createAnalysisAction } from '@/app/(app)/analysis/actions';
 import { CheckCircle2 } from 'lucide-react';
-import { useEffect, useTransition } from 'react';
+import { useTransition } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 
-import { AnalysisLoadingAnimation } from './animations/analysis-generation-animation';
+import { AnalysisLoadingAnimation } from '../../../analysis/new/components/analysis-generation-animation';
 import { WizardStepContainer } from './components/wizard-step-container';
 import { useWizardStore } from './store/wizard-store';
 
