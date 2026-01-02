@@ -1,3 +1,6 @@
+
+
+
 # Interview Prep Application
 
 > **Note**: This is a personal pet project created as a portfolio piece and code example to demonstrate modern web development practices.
@@ -29,8 +32,10 @@ An AI-powered interview preparation tool that helps candidates prepare for job i
 
 ## Demo
 
-Video url
+https://github.com/user-attachments/assets/2fa5cdfb-9b2a-4a77-bccc-7051c29b1677
 
 ## Deployed on Vercel
 
 https://interview-test-flight.vercel.app/
+
+Test user: test@test:qwerty
