@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { ContentCard } from '@/components/ui/content-card';
 import { PageSection } from '@/components/ui/page-section';
@@ -26,11 +26,7 @@ export default function SettingsPage() {
   return (
     <PageSection title="Settings" description="Account + privacy controls.">
       <div className="space-y-6">
-        {error ? (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        ) : null}
+        {error ? <Alert variant="destructive" description={error} /> : null}
 
         <ContentCard title="Account" description="Sign out of this device.">
           <Button variant="destructive" onClick={signOut} loading={isPending}>

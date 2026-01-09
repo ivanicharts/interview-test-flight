@@ -1,13 +1,14 @@
 'use client';
 
-import * as React from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useTriggerOtpAuth, useVerifyOtpAuth } from '@/lib/auth/auth';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import * as React from 'react';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useTriggerOtpAuth, useVerifyOtpAuth } from '@/lib/auth/auth';
+
+import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 import RequestForm from '../components/otp-request-form';
 import SubmitForm from '../components/otp-submit-form';
@@ -124,11 +125,7 @@ function OtpLoginPageContent() {
             />
           )}
 
-          {error ? (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          ) : null}
+          {error ? <Alert variant="destructive" description={error} /> : null}
         </CardContent>
       </Card>
       <Button asChild variant="link" className="text-muted-foreground text-xs">

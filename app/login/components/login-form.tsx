@@ -1,18 +1,15 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
-import { Loader2 } from 'lucide-react';
+import { useState } from 'react';
 
 import { usePasswordAuth } from '@/lib/auth/auth';
-import { cn } from '@/lib/utils';
 
+import { Alert } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 
 type Props = { onSuccess: () => void; onSignupClick: () => void };
 
@@ -45,11 +42,7 @@ export default function LoginForm({ onSuccess, onSignupClick }: Props) {
       <CardContent>
         <form onSubmit={onSubmit}>
           <FieldGroup>
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
+            {error ? <Alert variant="destructive" description={error} /> : null}
             <Field>
               <FieldLabel htmlFor="email">Email</FieldLabel>
               <Input

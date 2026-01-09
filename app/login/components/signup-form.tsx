@@ -1,15 +1,15 @@
 'use client';
 
+import { Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 import { usePasswordSignUp } from '@/lib/auth/auth';
 
+import { Alert } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 
 type Props = { onSuccess: () => void; onLoginClick: () => void };
 
@@ -44,11 +44,7 @@ export default function SignupForm({ onSuccess, onLoginClick }: Props) {
       <CardContent>
         <form onSubmit={onSubmit}>
           <FieldGroup>
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
+            {error ? <Alert variant="destructive" description={error} /> : null}
             <Field>
               <FieldLabel htmlFor="email">Email</FieldLabel>
               <Input
