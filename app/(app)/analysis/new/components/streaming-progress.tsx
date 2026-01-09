@@ -4,6 +4,7 @@ import { Check, X } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
+import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { ContentCard } from '@/components/ui/content-card';
 import { Progress } from '@/components/ui/progress';
@@ -34,12 +35,9 @@ export function StreamingProgress({
     <div className={cn('space-y-4', className)}>
       {/* Progress bar and stage */}
       <ContentCard>
-        <div className="space-y-3">
+        <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <h3 className="font-semibold">Generating Analysis Report</h3>
-              <p className="text-sm text-muted-foreground">{stage}</p>
-            </div>
+            <h3 className="font-semibold">Generating Analysis Report</h3>
             {onCancel && (
               <Button
                 variant="ghost"
@@ -57,7 +55,7 @@ export function StreamingProgress({
             <Progress value={percent} tone="neutral" className="h-2" />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>{percent}% complete</span>
-              <span>{percent < 100 ? 'In progress...' : 'Complete'}</span>
+              <span>{percent < 100 ? stage : 'Complete'}</span>
             </div>
           </div>
         </div>
@@ -118,7 +116,7 @@ export function StreamingProgress({
                       : strength?.title || strength?.description || 'Strength';
                   return (
                     <li key={index} className="flex items-start gap-2 text-sm">
-                      <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-600" />
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
                       <span>{text}</span>
                     </li>
                   );
@@ -144,7 +142,7 @@ export function StreamingProgress({
                   <li key={index} className="flex items-start gap-2 text-sm">
                     <span
                       className={cn(
-                        'mt-0.5 inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded text-xs font-semibold',
+                        'mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded text-xs font-semibold',
                         gap.priority === 'high'
                           ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-400'
                           : gap.priority === 'medium'
@@ -165,12 +163,16 @@ export function StreamingProgress({
 
       {percent < 100 && <AnalysisLoadingAnimation />}
 
-      {/* Completion state (hidden until 100%) */}
-      {percent === 100 && (
-        <div className="flex items-center justify-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">
-          <Check className="h-4 w-4" />
-          <span>Analysis complete! Redirecting...</span>
-        </div>
+      {percent >= 100 && (
+        <Alert
+          variant="success"
+          description={
+            <div className="flex items-center justify-center gap-2 w-full">
+              <Check className="h-4 w-4" />
+              <span>Analysis complete! Redirecting...</span>
+            </div>
+          }
+        />
       )}
     </div>
   );

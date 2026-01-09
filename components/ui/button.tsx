@@ -1,5 +1,5 @@
 import { Slot } from '@radix-ui/react-slot';
-import { cva, type VariantProps } from 'class-variance-authority';
+import { type VariantProps, cva } from 'class-variance-authority';
 import { Loader2 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -39,6 +39,7 @@ const buttonVariants = cva(
 const Button = ({
   className,
   variant = 'default',
+  // How large should the button be?
   size = 'default',
   asChild = false,
   loading = false,

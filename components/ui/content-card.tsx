@@ -26,15 +26,19 @@ export const ContentCard = ({
       className,
     )}
   >
-    <div>
-      {title || label ? (
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          {title && <h2 className="text-lg font-semibold">{title}</h2>}
-          {label}
+    {title ||
+      label ||
+      (description && (
+        <div>
+          {title || label ? (
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              {title && <h2 className="text-lg font-semibold">{title}</h2>}
+              {label}
+            </div>
+          ) : null}
+          {description ? <div className="text-muted-foreground text-sm">{description}</div> : null}
         </div>
-      ) : null}
-      {description ? <div className="text-muted-foreground text-sm">{description}</div> : null}
-    </div>
+      ))}
     {children}
   </section>
 );

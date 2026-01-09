@@ -2,10 +2,8 @@
 
 import { StreamingProgress } from '@/app/(app)/analysis/new/components/streaming-progress';
 import { useSubmitAnalysis } from '@/app/(app)/analysis/new/use-submit-analysis';
-import { CheckCircle2 } from 'lucide-react';
 import { useShallow } from 'zustand/react/shallow';
 
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 
 import { WizardStepContainer } from './components/wizard-step-container';
@@ -70,13 +68,6 @@ export function WizardStepAnalysis() {
             onCancel={isStreaming ? cancelStreaming : undefined}
           />
         </div>
-      )}
-
-      {analysisId && !isStreaming && (
-        <Alert>
-          <CheckCircle2 className="h-4 w-4" />
-          <AlertDescription>Analysis complete! Generating interview questions...</AlertDescription>
-        </Alert>
       )}
     </WizardStepContainer>
   );
