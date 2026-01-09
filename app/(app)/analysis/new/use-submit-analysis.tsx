@@ -167,6 +167,7 @@ export const useSubmitAnalysis = ({ onSuccess, onError }: Props) => {
     ...state,
     createAnalysis,
     cancelStreaming,
+    isCompleted: state.streamingState === STREAMING_STATES.COMPLETE,
     isStreaming:
       state.streamingState === STREAMING_STATES.STREAMING ||
       state.streamingState === STREAMING_STATES.CONNECTING,

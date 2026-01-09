@@ -63,8 +63,6 @@ export function StreamingProgress({
         </div>
       </ContentCard>
 
-      {!partialResults?.overallScore && percent < 100 && <AnalysisLoadingAnimation />}
-
       {/* Partial results */}
       {partialResults && (
         <div className="space-y-4 animate-in fade-in-50 duration-300">
@@ -164,6 +162,8 @@ export function StreamingProgress({
           )}
         </div>
       )}
+
+      {percent < 100 && <AnalysisLoadingAnimation />}
 
       {/* Completion state (hidden until 100%) */}
       {percent === 100 && (

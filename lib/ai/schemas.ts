@@ -89,7 +89,7 @@ export const AnalysisResultSchema = z.object({
       .array(
         z.object({
           section: z.string().min(1).max(220),
-          after: z.string().min(1).max(360),
+          after: z.string().min(1).max(500),
           rationale: z.string().min(1).max(320),
         }),
       )
